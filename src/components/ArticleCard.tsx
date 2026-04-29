@@ -22,7 +22,7 @@ const sourceColors: Record<string, string> = {
 
 export function ArticleCard({ article, variant = "default", className }: Props) {
   const mounted = useMounted();
-  const ago = mounted ? ago : "just now";
+  const ago = mounted ? timeAgo(article.publishedAt) : "just now";
   if (variant === "featured") {
     return (
       <Link
