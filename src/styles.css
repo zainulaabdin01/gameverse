@@ -147,29 +147,93 @@
 
   .bg-grid {
     background-image:
-      linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(to right, oklch(1 0 0 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.045) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent 80%);
   }
 
   .bg-radial-spotlight {
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 15% 0%, color-mix(in oklab, var(--primary) 28%, transparent), transparent 65%),
+      radial-gradient(ellipse 55% 45% at 85% 10%, color-mix(in oklab, var(--primary-glow) 22%, transparent), transparent 65%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%),
       var(--color-background);
   }
 
+  .bg-aurora {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .bg-aurora::before,
+  .bg-aurora::after {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: aurora-drift 18s ease-in-out infinite alternate;
+  }
+  .bg-aurora::before {
+    background:
+      radial-gradient(closest-side, color-mix(in oklab, var(--primary) 70%, transparent), transparent),
+      radial-gradient(closest-side at 70% 30%, color-mix(in oklab, var(--primary-glow) 70%, transparent), transparent);
+  }
+  .bg-aurora::after {
+    background:
+      radial-gradient(closest-side at 30% 70%, color-mix(in oklab, var(--accent) 60%, transparent), transparent),
+      radial-gradient(closest-side at 80% 80%, color-mix(in oklab, var(--primary) 50%, transparent), transparent);
+    animation-delay: -6s;
+  }
+  @keyframes aurora-drift {
+    0%   { transform: translate3d(-4%, -2%, 0) rotate(0deg); }
+    50%  { transform: translate3d(3%, 2%, 0) rotate(8deg); }
+    100% { transform: translate3d(-2%, 4%, 0) rotate(-6deg); }
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--surface) 70%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  }
+
   .gradient-primary {
-    background-image: linear-gradient(135deg, var(--primary), var(--primary-glow));
+    background-image: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
   }
   .gradient-text {
-    background-image: linear-gradient(135deg, var(--primary), var(--primary-glow));
+    background-image: linear-gradient(120deg, var(--primary) 0%, var(--primary-glow) 55%, var(--accent) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 60%, transparent), color-mix(in oklab, var(--accent) 50%, transparent));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
 
   .shadow-glow {
-    box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--primary) 45%, transparent);
+    box-shadow:
+      0 10px 40px -10px color-mix(in oklab, var(--primary) 55%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+  .shadow-glow-accent {
+    box-shadow:
+      0 10px 40px -10px color-mix(in oklab, var(--accent) 55%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent);
   }
 
   .live-dot {
