@@ -22,7 +22,7 @@ const sourceColors: Record<string, string> = {
 
 export function ArticleCard({ article, variant = "default", className }: Props) {
   const mounted = useMounted();
-  const ago = mounted ? timeAgo(article.publishedAt) : "just now";
+  const ago = mounted ? ago : "just now";
   if (variant === "featured") {
     return (
       <Link
@@ -55,7 +55,7 @@ export function ArticleCard({ article, variant = "default", className }: Props) 
             <span className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
               {article.category}
             </span>
-            <span className="text-xs text-muted-foreground">{timeAgo(article.publishedAt)}</span>
+            <span className="text-xs text-muted-foreground">{ago}</span>
           </div>
           <h3 className="mt-3 max-w-3xl font-display text-2xl font-bold leading-tight md:text-3xl group-hover:gradient-text transition-colors">
             {article.title}
@@ -83,7 +83,7 @@ export function ArticleCard({ article, variant = "default", className }: Props) 
         </div>
         <div className="min-w-0">
           <span className="text-[10px] font-mono-accent uppercase text-muted-foreground">
-            {article.source} · {timeAgo(article.publishedAt)}
+            {article.source} · {ago}
           </span>
           <h4 className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug group-hover:text-primary">
             {article.title}
@@ -122,7 +122,7 @@ export function ArticleCard({ article, variant = "default", className }: Props) 
         <div className="flex items-center gap-2 text-[10px] font-mono-accent uppercase text-muted-foreground">
           <span>{article.category}</span>
           <span>·</span>
-          <span>{timeAgo(article.publishedAt)}</span>
+          <span>{ago}</span>
         </div>
         <h3 className="font-display text-base font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {article.title}
