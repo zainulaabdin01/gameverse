@@ -285,17 +285,52 @@ function HomePage() {
           to="/games"
           cta="Game directory"
         />
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+        <div className="grid gap-4 md:grid-cols-12">
+          {/* Big poster — left */}
           {games[0] && (
-            <div className="col-span-2 row-span-2 md:col-span-3 md:row-span-2">
-              <GameCard game={games[0]} size="lg" className="h-full" />
-            </div>
+            <Link
+              to="/games/$slug"
+              params={{ slug: games[0].slug }}
+              className="group relative md:col-span-7 overflow-hidden rounded-2xl border border-border/60 bg-surface hover-lift"
+            >
+              <div className="relative aspect-[16/10] md:aspect-[16/11] overflow-hidden">
+                <img
+                  src={games[0].hero}
+                  alt={games[0].title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+                <div className="font-mono-accent text-[10px] uppercase tracking-[0.25em] text-primary">
+                  ▍ Editor's pick
+                </div>
+                <h3 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight group-hover:gradient-text">
+                  {games[0].title}
+                </h3>
+                <p className="mt-2 max-w-md text-sm text-muted-foreground line-clamp-2">
+                  {games[0].shortDescription}
+                </p>
+                <div className="mt-4 flex items-center gap-2 font-mono-accent text-[10px] uppercase">
+                  <span className="rounded-full bg-primary/15 px-2 py-1 text-primary">
+                    {games[0].rating}/100
+                  </span>
+                  {games[0].genres.slice(0, 2).map((g) => (
+                    <span key={g} className="rounded-full bg-surface-3 px-2 py-1 text-muted-foreground">
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Link>
           )}
-          {games.slice(1, 5).map((g) => (
-            <div key={g.slug} className="md:col-span-3 lg:col-span-3 xl:col-span-3">
-              <GameCardWide game={g} />
-            </div>
-          ))}
+          {/* Stacked picks — right */}
+          <div className="md:col-span-5 grid gap-4">
+            {games.slice(1, 5).map((g) => (
+              <GameCardWide key={g.slug} game={g} />
+            ))}
+          </div>
         </div>
       </section>
 
