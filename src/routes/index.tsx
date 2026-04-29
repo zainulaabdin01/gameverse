@@ -37,15 +37,21 @@ function HomePage() {
       {/* ============================================================
           HERO — full-bleed, dramatic, magazine cover energy
           ============================================================ */}
-      <section className="relative overflow-hidden min-h-[92vh] flex flex-col">
+      <section className="relative overflow-hidden h-[80vh] min-h-[680px] flex flex-col">
         {/* Atmosphere — layered for depth */}
-        <div className="bg-aurora absolute inset-0 opacity-60" />
-        <div className="bg-grid absolute inset-0 opacity-[0.2]" />
-        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-accent/20 blur-[120px]" />
+        <div className="bg-aurora absolute inset-0 opacity-70" />
+        <div className="bg-grid absolute inset-0 opacity-[0.18]" />
+        <div className="absolute -top-40 -left-40 h-[680px] w-[680px] rounded-full bg-primary/25 blur-[140px] animate-pulse" style={{ animationDuration: "8s" }} />
+        <div className="absolute -bottom-40 -right-40 h-[680px] w-[680px] rounded-full bg-accent/25 blur-[140px] animate-pulse" style={{ animationDuration: "10s" }} />
+        <div className="absolute left-1/2 top-1/3 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-primary/10 blur-[100px]" />
+        {/* corner frame accents */}
+        <div className="pointer-events-none absolute left-6 top-20 h-12 w-12 border-l border-t border-primary/40 md:left-10" />
+        <div className="pointer-events-none absolute right-6 top-20 h-12 w-12 border-r border-t border-accent/40 md:right-10" />
+        <div className="pointer-events-none absolute left-6 bottom-20 h-12 w-12 border-l border-b border-accent/40 md:left-10" />
+        <div className="pointer-events-none absolute right-6 bottom-20 h-12 w-12 border-r border-b border-primary/40 md:right-10" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-        <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 pt-12 pb-20 md:px-10 md:pt-16 md:pb-24">
+        <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 pt-8 pb-10 md:px-10 md:pt-12 md:pb-14">
           {/* Eyebrow / masthead bar */}
           <div className="mb-12 flex items-center justify-between font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground md:mb-16">
             <div className="flex items-center gap-3">
