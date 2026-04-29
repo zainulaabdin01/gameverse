@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Flame, Trophy, Newspaper, Play, Radio, Gamepad2 } from "lucide-react";
+import { ArrowRight, Flame, Play, Radio } from "lucide-react";
 import { ArticleCard } from "@/components/ArticleCard";
 import { GameCard } from "@/components/GameCard";
 import { MatchCard } from "@/components/MatchCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { articles, featuredArticles } from "@/data/news";
 import { featuredGames, trendingGames } from "@/data/games";
-import { liveMatches, upcomingMatches, getTeam } from "@/data/esports";
+import { liveMatches, upcomingMatches } from "@/data/esports";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,98 +25,87 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const heroes = featuredArticles();
   const lead = heroes[0];
-  const subLeads = heroes.slice(1, 4);
   const live = liveMatches();
   const upcoming = upcomingMatches().slice(0, 3);
   const topStories = articles.filter((a) => !a.featured).slice(0, 6);
   const trending = articles.slice(0, 5);
   const games = featuredGames();
   const hot = trendingGames();
-  const featuredGame = games[0];
 
   return (
     <>
       {/* ============================================================
-          HERO — editorial split: massive headline left, lead story right
+          HERO — calm editorial: one statement, one lead, plenty of air
           ============================================================ */}
-      <section className="relative overflow-hidden border-b border-border/60">
-        <div className="bg-grid absolute inset-0 opacity-[0.35]" />
-        <div className="bg-aurora absolute inset-0 opacity-60" />
-        <div className="relative mx-auto max-w-[1400px] px-4 pb-16 pt-14 md:px-8 md:pb-24 md:pt-20">
-          {/* Top meta bar */}
-          <div className="mb-10 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono-accent text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+      <section className="relative overflow-hidden">
+        {/* Atmosphere */}
+        <div className="bg-aurora absolute inset-0 opacity-40" />
+        <div className="bg-grid absolute inset-0 opacity-[0.25]" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+        <div className="relative mx-auto max-w-[1280px] px-6 pt-20 pb-24 md:px-10 md:pt-28 md:pb-32">
+          {/* Eyebrow */}
+          <div className="mb-10 flex items-center gap-3 font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
             <span className="flex items-center gap-2 text-primary">
-              <span className="live-dot" /> Issue 042 · Live
+              <span className="live-dot" /> On the wire
             </span>
-            <span className="hidden md:inline">Wed, Apr 29</span>
-            <span className="hidden md:inline">{articles.length} stories today</span>
-            <span className="hidden md:inline">{live.length} matches running</span>
+            <span className="hidden h-px w-12 bg-border md:inline-block" />
+            <span className="hidden md:inline">Issue 042 · Wed, Apr 29</span>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* LEFT — Big statement */}
-            <div className="lg:col-span-6 animate-fade-up">
-              <h1 className="font-display text-[clamp(2.75rem,7vw,5.5rem)] font-bold leading-[0.95] tracking-tight">
-                Every story.
+          <div className="grid items-end gap-12 lg:grid-cols-12 lg:gap-16">
+            {/* LEFT — Statement */}
+            <div className="lg:col-span-7 animate-fade-up">
+              <h1 className="font-display text-[clamp(3rem,8vw,6.5rem)] font-bold leading-[0.92] tracking-tight">
+                Everything
                 <br />
-                Every score.
+                gaming.
                 <br />
-                <span className="gradient-text">Every game.</span>
+                <span className="gradient-text">One place.</span>
               </h1>
-              <p className="mt-6 max-w-md text-base text-muted-foreground md:text-lg">
-                One hub for gaming news, live esports, and a searchable directory of
-                thousands of titles. Stop chasing five tabs — start here.
+              <p className="mt-8 max-w-lg text-base text-muted-foreground md:text-lg">
+                News, live esports, and a directory of thousands of games — finally
+                under one roof. No more juggling tabs.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-10 flex flex-wrap items-center gap-3">
                 <Link
-                  to="/news"
-                  className="group flex items-center gap-2 rounded-full gradient-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow"
+                  to="/games"
+                  className="group flex items-center gap-2 rounded-full gradient-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
                 >
-                  <Newspaper className="h-4 w-4" />
-                  Today's headlines
+                  <Play className="h-4 w-4" />
+                  Explore the verse
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
                   to="/esports"
-                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/60 px-5 py-2.5 text-sm font-medium hover:border-accent/50 hover:text-accent transition-colors"
+                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/40 px-6 py-3 text-sm font-medium hover:border-accent/50 hover:text-accent transition-colors"
                 >
                   <Radio className="h-4 w-4" />
-                  Watch live matches
+                  Live matches
                 </Link>
               </div>
-
-              {/* Stat band */}
-              <dl className="mt-12 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60">
-                <Stat label="Outlets" value="14" />
-                <Stat label="Live now" value={String(live.length).padStart(2, "0")} accent />
-                <Stat label="Games" value="2.4K" />
-              </dl>
             </div>
 
-            {/* RIGHT — Lead story + 3 stacked sub-leads */}
-            <div className="lg:col-span-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
-              {lead && (
-                <ArticleCard
-                  article={lead}
-                  variant="featured"
-                  className="sm:col-span-2"
-                />
-              )}
-              {subLeads.map((a) => (
-                <ArticleCard key={a.slug} article={a} />
-              ))}
-            </div>
+            {/* RIGHT — single lead story, vertical poster */}
+            {lead && (
+              <div className="lg:col-span-5 animate-fade-up">
+                <div className="mb-4 flex items-center justify-between font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                  <span className="text-accent">▍ Lead story</span>
+                  <span>01 / {heroes.length.toString().padStart(2, "0")}</span>
+                </div>
+                <ArticleCard article={lead} variant="featured" />
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* ============================================================
-          COMMAND DECK — Live esports rail w/ upcoming + game spotlight
-          Asymmetric: 8/4 split
+          COMMAND DECK — Live esports
           ============================================================ */}
-      <section className="relative border-b border-border/60 bg-surface/30">
-        <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-20">
+      <section className="relative bg-surface/20">
+        <div className="mx-auto max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
           <SectionHeader
             index="01"
             eyebrow="Command deck"
@@ -126,106 +115,19 @@ function HomePage() {
             cta="All esports"
           />
 
-          <div className="grid gap-5 lg:grid-cols-12">
-            <div className="lg:col-span-8 grid gap-4 sm:grid-cols-2">
-              {[...live, ...upcoming].slice(0, 4).map((m) => (
-                <MatchCard key={m.id} match={m} />
-              ))}
-            </div>
-
-            {/* Featured game card — vertical poster */}
-            {featuredGame && (
-              <Link
-                to="/games/$slug"
-                params={{ slug: featuredGame.slug }}
-                className="group relative lg:col-span-4 overflow-hidden rounded-2xl border border-border/60 bg-surface hover-lift"
-              >
-                <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden">
-                  <img
-                    src={featuredGame.hero}
-                    alt={featuredGame.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-6">
-                  <div className="font-mono-accent text-[10px] uppercase tracking-[0.25em] text-accent">
-                    ▍ Game spotlight
-                  </div>
-                  <h3 className="mt-3 font-display text-2xl font-bold leading-tight group-hover:gradient-text transition-colors">
-                    {featuredGame.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                    {featuredGame.shortDescription}
-                  </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2 font-mono-accent text-[10px] uppercase">
-                    <span className="rounded-full bg-primary/15 px-2 py-1 text-primary">
-                      {featuredGame.rating}/100
-                    </span>
-                    {featuredGame.genres.slice(0, 2).map((g) => (
-                      <span key={g} className="rounded-full bg-surface-3 px-2 py-1 text-muted-foreground">
-                        {g}
-                      </span>
-                    ))}
-                    <span className="ml-auto flex items-center gap-1 text-foreground">
-                      Explore <ArrowRight className="h-3 w-3" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...live, ...upcoming].slice(0, 3).map((m) => (
+              <MatchCard key={m.id} match={m} />
+            ))}
           </div>
         </div>
       </section>
 
       {/* ============================================================
-          DESTINATIONS — three quick portals
+          THE BRIEFING — top stories + numbered trending
           ============================================================ */}
-      <section className="mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-20">
-        <div className="mb-10 max-w-2xl">
-          <div className="font-mono-accent text-[11px] uppercase tracking-[0.25em] text-primary">
-            ▍ Pick your lane
-          </div>
-          <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight">
-            Three destinations.{" "}
-            <span className="gradient-text">One universe.</span>
-          </h2>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <DestinationCard
-            to="/news"
-            number="A"
-            icon={Newspaper}
-            title="News Hub"
-            kicker="Read everything, fast"
-            desc="A unified feed pulling from IGN, Kotaku, Dot Esports, PC Gamer and more — no subreddit hopping required."
-          />
-          <DestinationCard
-            to="/esports"
-            number="B"
-            icon={Trophy}
-            title="Esports Stats"
-            kicker="Live matches & standings"
-            desc="Live scoreboards, standings, and player ratings for the biggest tournaments in Valorant, CS2, League and Dota."
-            accent
-          />
-          <DestinationCard
-            to="/games"
-            number="C"
-            icon={Gamepad2}
-            title="Game Directory"
-            kicker="Find your next obsession"
-            desc="Search thousands of titles by genre, platform or rating. Descriptions and recent news come baked in."
-          />
-        </div>
-      </section>
-
-      {/* ============================================================
-          THE BRIEFING — magazine-style top stories + numbered trending
-          ============================================================ */}
-      <section className="relative border-y border-border/60 bg-surface/20">
-        <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-20">
+      <section className="relative border-y border-border/60">
+        <div className="mx-auto max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
           <SectionHeader
             index="02"
             eyebrow="The briefing"
@@ -234,13 +136,13 @@ function HomePage() {
             to="/news"
             cta="News hub"
           />
-          <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {topStories.map((a) => (
+          <div className="grid gap-12 lg:grid-cols-[1fr_300px]">
+            <div className="grid gap-5 sm:grid-cols-2">
+              {topStories.slice(0, 4).map((a) => (
                 <ArticleCard key={a.slug} article={a} />
               ))}
             </div>
-            <aside className="lg:sticky lg:top-24 self-start rounded-2xl gradient-border bg-surface/60 p-6">
+            <aside className="lg:sticky lg:top-24 self-start rounded-2xl gradient-border bg-surface/40 p-6">
               <div className="flex items-center justify-between">
                 <h3 className="font-display text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                   Trending now
@@ -250,7 +152,7 @@ function HomePage() {
               <ol className="mt-5 divide-y divide-border/60">
                 {trending.map((a, i) => (
                   <li key={a.slug} className="group flex gap-3 py-3 first:pt-0 last:pb-0">
-                    <span className="font-display text-3xl font-bold leading-none gradient-text w-9 flex-shrink-0">
+                    <span className="font-display text-2xl font-bold leading-none gradient-text w-8 flex-shrink-0">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <Link
@@ -274,9 +176,9 @@ function HomePage() {
       </section>
 
       {/* ============================================================
-          SPOTLIGHT — featured games grid (intentional asymmetry)
+          SPOTLIGHT — featured games (asymmetric)
           ============================================================ */}
-      <section className="mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-20">
+      <section className="mx-auto max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
         <SectionHeader
           index="03"
           eyebrow="Spotlight"
@@ -286,7 +188,6 @@ function HomePage() {
           cta="Game directory"
         />
         <div className="grid gap-4 md:grid-cols-12">
-          {/* Big poster — left */}
           {games[0] && (
             <Link
               to="/games/$slug"
@@ -325,9 +226,8 @@ function HomePage() {
               </div>
             </Link>
           )}
-          {/* Stacked picks — right */}
           <div className="md:col-span-5 grid gap-4">
-            {games.slice(1, 5).map((g) => (
+            {games.slice(1, 4).map((g) => (
               <GameCardWide key={g.slug} game={g} />
             ))}
           </div>
@@ -338,7 +238,7 @@ function HomePage() {
           HEAT CHECK — horizontal trending rail
           ============================================================ */}
       <section className="relative border-t border-border/60 bg-surface/20">
-        <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-20">
+        <div className="mx-auto max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
           <SectionHeader
             index="04"
             eyebrow="Heat check"
@@ -347,7 +247,7 @@ function HomePage() {
             to="/games"
             cta="Browse all"
           />
-          <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0">
+          <div className="-mx-6 flex snap-x gap-4 overflow-x-auto px-6 scrollbar-none md:mx-0 md:px-0">
             {hot.map((g) => (
               <GameCard
                 key={g.slug}
@@ -364,8 +264,8 @@ function HomePage() {
           FINAL CTA
           ============================================================ */}
       <section className="relative overflow-hidden">
-        <div className="bg-aurora absolute inset-0 opacity-50" />
-        <div className="relative mx-auto max-w-[1400px] px-4 py-20 md:px-8 md:py-28 text-center">
+        <div className="bg-aurora absolute inset-0 opacity-40" />
+        <div className="relative mx-auto max-w-[1280px] px-6 py-24 md:px-10 md:py-32 text-center">
           <div className="font-mono-accent text-[11px] uppercase tracking-[0.3em] text-accent">
             ▍ Welcome to the verse
           </div>
@@ -374,7 +274,7 @@ function HomePage() {
             <br />
             <span className="gradient-text">Start playing.</span>
           </h2>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/games"
               className="group flex items-center gap-2 rounded-full gradient-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
@@ -397,76 +297,6 @@ function HomePage() {
 }
 
 /* ─────────────────────────── helpers ─────────────────────────── */
-
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="bg-surface px-4 py-4 md:px-5 md:py-5">
-      <div
-        className={
-          "font-display text-2xl md:text-3xl font-bold tabular-nums " +
-          (accent ? "gradient-text" : "")
-        }
-      >
-        {value}
-      </div>
-      <div className="mt-1 font-mono-accent text-[10px] uppercase tracking-widest text-muted-foreground">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function DestinationCard({
-  to,
-  number,
-  icon: Icon,
-  title,
-  kicker,
-  desc,
-  accent,
-}: {
-  to: "/news" | "/esports" | "/games";
-  number: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  kicker: string;
-  desc: string;
-  accent?: boolean;
-}) {
-  return (
-    <Link
-      to={to}
-      className={
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-surface p-6 hover-lift " +
-        (accent ? "hover:border-accent/50" : "hover:border-primary/50")
-      }
-    >
-      <div className="flex items-start justify-between">
-        <div
-          className={
-            "flex h-12 w-12 items-center justify-center rounded-xl " +
-            (accent ? "bg-accent/15 text-accent" : "bg-primary/15 text-primary")
-          }
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        <span className="font-mono-accent text-[11px] tracking-widest text-muted-foreground">
-          0{number === "A" ? "1" : number === "B" ? "2" : "3"} / 03
-        </span>
-      </div>
-      <div className="mt-6 font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-        {kicker}
-      </div>
-      <h3 className="mt-2 font-display text-2xl font-bold leading-tight group-hover:text-foreground">
-        {title}
-      </h3>
-      <p className="mt-3 flex-1 text-sm text-muted-foreground">{desc}</p>
-      <div className="mt-6 flex items-center gap-1.5 text-sm font-medium text-foreground">
-        Open <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-      </div>
-    </Link>
-  );
-}
 
 function GameCardWide({ game }: { game: ReturnType<typeof featuredGames>[number] }) {
   return (
