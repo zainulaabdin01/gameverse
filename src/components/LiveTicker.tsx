@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { liveMatches, upcomingMatches, getTeam, type Match } from "@/data/esports";
 import { formatViewers, timeUntil } from "@/lib/format";
+import { useMounted } from "@/hooks/use-mounted";
 
 /** Subtle live nudge: tweak scores/viewers periodically to feel alive. */
 function useLiveNudge(initial: Match[]) {
@@ -64,6 +65,7 @@ export function LiveTicker() {
 function TickerItem({ match }: { match: Match }) {
   const a = getTeam(match.teamAId);
   const b = getTeam(match.teamBId);
+  const mounted = useMounted();
   return (
     <Link
       to="/esports/$matchId"
@@ -79,7 +81,7 @@ function TickerItem({ match }: { match: Match }) {
         </span>
       ) : (
         <span className="font-mono-accent uppercase text-[10px] text-muted-foreground">
-          {timeUntil(match.startsAt)}
+          {mounted ? timeUntil(match.startsAt) : "soon"}
         </span>
       )}
       <span className="flex items-center gap-2 font-medium group-hover:text-primary transition-colors">
