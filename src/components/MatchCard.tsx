@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { Match } from "@/data/esports";
 import { getTeam } from "@/data/esports";
 import { formatViewers, timeUntil } from "@/lib/format";
+import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -15,6 +16,7 @@ export function MatchCard({ match, className }: Props) {
   const isLive = match.status === "live";
   const isFinished = match.status === "finished";
   const winner = isFinished ? (match.scoreA > match.scoreB ? "a" : "b") : null;
+  const mounted = useMounted();
 
   return (
     <Link
@@ -37,7 +39,7 @@ export function MatchCard({ match, className }: Props) {
         )}
         {match.status === "upcoming" && (
           <span className="font-mono-accent text-[10px] uppercase text-muted-foreground">
-            {timeUntil(match.startsAt)}
+            {mounted ? timeUntil(match.startsAt) : "soon"}
           </span>
         )}
         {isFinished && (

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { Article } from "@/data/news";
 import { timeAgo } from "@/lib/format";
+import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -20,6 +21,8 @@ const sourceColors: Record<string, string> = {
 };
 
 export function ArticleCard({ article, variant = "default", className }: Props) {
+  const mounted = useMounted();
+  const ago = mounted ? timeAgo(article.publishedAt) : "just now";
   if (variant === "featured") {
     return (
       <Link
