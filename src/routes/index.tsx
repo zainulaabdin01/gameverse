@@ -53,7 +53,7 @@ function HomePage() {
 
         <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 pt-8 pb-10 md:px-10 md:pt-12 md:pb-14">
           {/* Eyebrow / masthead bar */}
-          <div className="mb-12 flex items-center justify-between font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground md:mb-16">
+          <div className="mb-6 flex items-center justify-between font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground md:mb-10">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-2 text-primary">
                 <span className="live-dot" /> On the wire
@@ -64,30 +64,30 @@ function HomePage() {
             <span className="hidden md:inline text-accent">Vol. I — Gameverse Daily</span>
           </div>
 
-          <div className="grid flex-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="grid flex-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
             {/* LEFT — Massive statement */}
             <div className="lg:col-span-7 animate-fade-up">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono-accent text-[10px] uppercase tracking-[0.25em] text-primary">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono-accent text-[10px] uppercase tracking-[0.25em] text-primary shadow-glow">
                 <Flame className="h-3 w-3" />
                 The hub for players
               </div>
-              <h1 className="font-display font-bold leading-[0.86] tracking-tighter text-[clamp(3.5rem,11vw,9rem)]">
+              <h1 className="font-display font-bold leading-[0.85] tracking-tighter text-[clamp(3rem,9.5vw,8rem)]">
                 Everything
                 <br />
                 <span className="italic font-light text-muted-foreground/80">gaming.</span>
                 <br />
-                <span className="gradient-text">One place.</span>
+                <span className="gradient-text drop-shadow-[0_0_30px_rgba(168,85,247,0.4)]">One place.</span>
               </h1>
-              <p className="mt-10 max-w-xl text-lg text-muted-foreground md:text-xl leading-relaxed">
+              <p className="mt-6 max-w-xl text-base text-muted-foreground md:text-lg leading-relaxed">
                 News, live esports, and a directory of thousands of games —
                 finally under one roof.{" "}
                 <span className="text-foreground">No more juggling tabs.</span>
               </p>
 
-              <div className="mt-12 flex flex-wrap items-center gap-4">
+              <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   to="/games"
-                  className="group flex items-center gap-2 rounded-full gradient-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-glow"
+                  className="group flex items-center gap-2 rounded-full gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow hover:scale-[1.03] transition-transform"
                 >
                   <Play className="h-4 w-4" />
                   Explore the verse
@@ -95,7 +95,7 @@ function HomePage() {
                 </Link>
                 <Link
                   to="/esports"
-                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/40 px-8 py-4 text-base font-medium backdrop-blur hover:border-accent/50 hover:text-accent transition-colors"
+                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/40 px-7 py-3.5 text-sm font-medium backdrop-blur hover:border-accent/50 hover:text-accent transition-colors"
                 >
                   <Radio className="h-4 w-4" />
                   Live matches
@@ -103,14 +103,14 @@ function HomePage() {
               </div>
 
               {/* Stat strip */}
-              <div className="mt-14 grid max-w-xl grid-cols-3 gap-6 border-t border-border/60 pt-8">
+              <div className="mt-8 grid max-w-xl grid-cols-3 gap-6 border-t border-border/60 pt-5">
                 {[
                   { k: "12K+", v: "Games indexed" },
                   { k: "240", v: "Live matches / wk" },
                   { k: "Daily", v: "Editorial briefing" },
                 ].map((s) => (
                   <div key={s.v}>
-                    <div className="font-display text-2xl font-bold gradient-text md:text-3xl">
+                    <div className="font-display text-xl font-bold gradient-text md:text-2xl">
                       {s.k}
                     </div>
                     <div className="mt-1 font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -121,10 +121,10 @@ function HomePage() {
               </div>
             </div>
 
-            {/* RIGHT — lead story poster, taller and more prominent */}
+            {/* RIGHT — lead story poster */}
             {lead && (
-              <div className="lg:col-span-5 animate-fade-up">
-                <div className="mb-4 flex items-center justify-between font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+              <div className="lg:col-span-5 animate-fade-up hidden lg:block">
+                <div className="mb-3 flex items-center justify-between font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                   <span className="text-accent">▍ Lead story</span>
                   <span>01 / {heroes.length.toString().padStart(2, "0")}</span>
                 </div>
