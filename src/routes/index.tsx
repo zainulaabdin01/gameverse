@@ -35,43 +35,53 @@ function HomePage() {
   return (
     <>
       {/* ============================================================
-          HERO — calm editorial: one statement, one lead, plenty of air
+          HERO — full-bleed, dramatic, magazine cover energy
           ============================================================ */}
-      <section className="relative overflow-hidden">
-        {/* Atmosphere */}
-        <div className="bg-aurora absolute inset-0 opacity-40" />
-        <div className="bg-grid absolute inset-0 opacity-[0.25]" />
+      <section className="relative overflow-hidden min-h-[92vh] flex flex-col">
+        {/* Atmosphere — layered for depth */}
+        <div className="bg-aurora absolute inset-0 opacity-60" />
+        <div className="bg-grid absolute inset-0 opacity-[0.2]" />
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-accent/20 blur-[120px]" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-        <div className="relative mx-auto max-w-[1280px] px-6 pt-20 pb-24 md:px-10 md:pt-28 md:pb-32">
-          {/* Eyebrow */}
-          <div className="mb-10 flex items-center gap-3 font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            <span className="flex items-center gap-2 text-primary">
-              <span className="live-dot" /> On the wire
-            </span>
-            <span className="hidden h-px w-12 bg-border md:inline-block" />
-            <span className="hidden md:inline">Issue 042 · Wed, Apr 29</span>
+        <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 pt-12 pb-20 md:px-10 md:pt-16 md:pb-24">
+          {/* Eyebrow / masthead bar */}
+          <div className="mb-12 flex items-center justify-between font-mono-accent text-[11px] uppercase tracking-[0.3em] text-muted-foreground md:mb-16">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-2 text-primary">
+                <span className="live-dot" /> On the wire
+              </span>
+              <span className="hidden h-px w-12 bg-border md:inline-block" />
+              <span className="hidden md:inline">Issue 042 · Wed, Apr 29</span>
+            </div>
+            <span className="hidden md:inline text-accent">Vol. I — Gameverse Daily</span>
           </div>
 
-          <div className="grid items-end gap-12 lg:grid-cols-12 lg:gap-16">
-            {/* LEFT — Statement */}
+          <div className="grid flex-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            {/* LEFT — Massive statement */}
             <div className="lg:col-span-7 animate-fade-up">
-              <h1 className="font-display text-[clamp(3rem,8vw,6.5rem)] font-bold leading-[0.92] tracking-tight">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono-accent text-[10px] uppercase tracking-[0.25em] text-primary">
+                <Flame className="h-3 w-3" />
+                The hub for players
+              </div>
+              <h1 className="font-display font-bold leading-[0.86] tracking-tighter text-[clamp(3.5rem,11vw,9rem)]">
                 Everything
                 <br />
-                gaming.
+                <span className="italic font-light text-muted-foreground/80">gaming.</span>
                 <br />
                 <span className="gradient-text">One place.</span>
               </h1>
-              <p className="mt-8 max-w-lg text-base text-muted-foreground md:text-lg">
-                News, live esports, and a directory of thousands of games — finally
-                under one roof. No more juggling tabs.
+              <p className="mt-10 max-w-xl text-lg text-muted-foreground md:text-xl leading-relaxed">
+                News, live esports, and a directory of thousands of games —
+                finally under one roof.{" "}
+                <span className="text-foreground">No more juggling tabs.</span>
               </p>
 
-              <div className="mt-10 flex flex-wrap items-center gap-3">
+              <div className="mt-12 flex flex-wrap items-center gap-4">
                 <Link
                   to="/games"
-                  className="group flex items-center gap-2 rounded-full gradient-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow"
+                  className="group flex items-center gap-2 rounded-full gradient-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-glow"
                 >
                   <Play className="h-4 w-4" />
                   Explore the verse
@@ -79,22 +89,45 @@ function HomePage() {
                 </Link>
                 <Link
                   to="/esports"
-                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/40 px-6 py-3 text-sm font-medium hover:border-accent/50 hover:text-accent transition-colors"
+                  className="flex items-center gap-2 rounded-full border border-border/80 bg-surface/40 px-8 py-4 text-base font-medium backdrop-blur hover:border-accent/50 hover:text-accent transition-colors"
                 >
                   <Radio className="h-4 w-4" />
                   Live matches
                 </Link>
               </div>
+
+              {/* Stat strip */}
+              <div className="mt-14 grid max-w-xl grid-cols-3 gap-6 border-t border-border/60 pt-8">
+                {[
+                  { k: "12K+", v: "Games indexed" },
+                  { k: "240", v: "Live matches / wk" },
+                  { k: "Daily", v: "Editorial briefing" },
+                ].map((s) => (
+                  <div key={s.v}>
+                    <div className="font-display text-2xl font-bold gradient-text md:text-3xl">
+                      {s.k}
+                    </div>
+                    <div className="mt-1 font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {s.v}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* RIGHT — single lead story, vertical poster */}
+            {/* RIGHT — lead story poster, taller and more prominent */}
             {lead && (
               <div className="lg:col-span-5 animate-fade-up">
                 <div className="mb-4 flex items-center justify-between font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                   <span className="text-accent">▍ Lead story</span>
                   <span>01 / {heroes.length.toString().padStart(2, "0")}</span>
                 </div>
-                <ArticleCard article={lead} variant="featured" />
+                <div className="relative">
+                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/20 via-transparent to-accent/20 blur-2xl" />
+                  <div className="relative">
+                    <ArticleCard article={lead} variant="featured" />
+                  </div>
+                </div>
               </div>
             )}
           </div>
