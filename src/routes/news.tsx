@@ -65,35 +65,68 @@ function NewsHub() {
 
   return (
     <div className="relative">
-      {/* Masthead */}
-      <header className="relative overflow-hidden border-b border-border/60">
-        <div className="absolute inset-0 bg-radial-spotlight opacity-90" />
-        <div className="absolute inset-0 bg-grid opacity-60" />
-        <div className="relative mx-auto max-w-[1400px] px-4 py-16 md:px-8 md:py-24">
-          <div className="flex items-center gap-3 font-mono-accent text-[11px] uppercase tracking-[0.32em] text-primary">
-            <span className="h-px w-10 bg-primary/60" />
-            The Wire · Vol. IV
-            <span className="text-muted-foreground/70">
-              — {mounted ? new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : ""}
+      {/* Nameplate — compact newspaper header */}
+      <header className="relative border-b border-border/60 bg-surface/20">
+        <div className="mx-auto max-w-[1400px] px-4 md:px-8">
+          {/* Top meta row */}
+          <div className="flex items-center justify-between border-b border-border/40 py-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <span>
+              {mounted
+                ? new Date().toLocaleDateString(undefined, {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : ""}
+            </span>
+            <span className="hidden sm:inline">Vol. IV · No. {sorted.length}</span>
+            <span className="flex items-center gap-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Live · {todayCount} today
             </span>
           </div>
 
-          <h1 className="mt-6 max-w-5xl font-display font-bold leading-[0.9] tracking-tight"
-              style={{ fontSize: "clamp(2.75rem, 8vw, 6.5rem)" }}>
-            Every gaming story,
-            <br />
-            <span className="italic font-medium gradient-text">one masthead.</span>
-          </h1>
+          {/* Nameplate */}
+          <div className="flex flex-col items-center py-6 text-center md:py-8">
+            <div className="font-mono-accent text-[10px] uppercase tracking-[0.4em] text-primary">
+              The Gameverse Wire
+            </div>
+            <h1 className="mt-2 font-display font-bold leading-none tracking-tight"
+                style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}>
+              News<span className="italic font-medium text-muted-foreground"> &amp; </span>
+              <span className="gradient-text">Reports</span>
+            </h1>
+            <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="h-px w-8 bg-border" />
+              The day's gaming headlines, curated from {sources.length} outlets
+              <span className="h-px w-8 bg-border" />
+            </div>
+          </div>
 
-          <div className="mt-8 flex flex-wrap items-end justify-between gap-6">
-            <p className="max-w-xl text-base text-muted-foreground md:text-lg">
-              An editor-curated wire of the day's most consequential reporting from the
-              biggest outlets in games — filtered however you want it.
-            </p>
-            <div className="flex divide-x divide-border/60 rounded-xl border border-border/60 bg-surface/40 backdrop-blur">
-              <Stat label="Stories" value={sorted.length.toString()} />
-              <Stat label="Today" value={todayCount.toString()} />
-              <Stat label="Sources" value={sources.length.toString()} />
+          {/* Headline ticker */}
+          <div className="flex items-center gap-3 overflow-hidden border-t border-border/40 py-2.5">
+            <span className="flex flex-shrink-0 items-center gap-1.5 rounded-sm bg-primary/15 px-2 py-0.5 font-mono-accent text-[10px] uppercase tracking-wider text-primary">
+              <TrendingUp className="h-3 w-3" />
+              Breaking
+            </span>
+            <div className="flex min-w-0 gap-6 overflow-x-auto scrollbar-none text-xs text-muted-foreground">
+              {sorted.slice(0, 5).map((a) => (
+                <Link
+                  key={a.slug}
+                  to="/news/$slug"
+                  params={{ slug: a.slug }}
+                  className="flex flex-shrink-0 items-center gap-2 hover:text-foreground"
+                >
+                  <span className="font-mono-accent text-[10px] uppercase text-primary/80">
+                    {a.source}
+                  </span>
+                  <span className="line-clamp-1">{a.title}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -221,16 +254,6 @@ function NewsHub() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="px-5 py-3">
-      <div className="font-display text-2xl font-bold leading-none gradient-text">{value}</div>
-      <div className="mt-1 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
-        {label}
-      </div>
-    </div>
-  );
-}
 
 function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
