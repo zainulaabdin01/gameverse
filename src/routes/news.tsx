@@ -254,16 +254,6 @@ function NewsHub() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="px-5 py-3">
-      <div className="font-display text-2xl font-bold leading-none gradient-text">{value}</div>
-      <div className="mt-1 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
-        {label}
-      </div>
-    </div>
-  );
-}
 
 function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
