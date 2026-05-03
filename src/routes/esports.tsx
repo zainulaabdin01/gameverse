@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Radio, CalendarClock, Trophy, Sparkles } from "lucide-react";
 import { MatchCard } from "@/components/MatchCard";
-import { SectionHeader } from "@/components/SectionHeader";
 import {
   esportsGames,
   liveMatches,
@@ -11,6 +11,7 @@ import {
   playersByGame,
   type EsportsGame,
 } from "@/data/esports";
+import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/esports")({
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/esports")({
 });
 
 function EsportsPage() {
+  const mounted = useMounted();
   const [filter, setFilter] = useState<EsportsGame | "all">("all");
 
   const live = useMemo(
@@ -48,113 +50,167 @@ function EsportsPage() {
     [filter],
   );
 
-  const standingsGames: EsportsGame[] =
-    filter === "all" ? esportsGames : [filter];
+  const standingsGames: EsportsGame[] = filter === "all" ? esportsGames : [filter];
 
   return (
-    <div>
-      <header className="border-b border-border/60 bg-surface/40">
-        <div className="mx-auto max-w-[1400px] px-4 py-12 md:px-8">
-          <div className="font-mono-accent text-[11px] uppercase tracking-[0.3em] text-primary">
-            ▍ Esports HQ
+    <div className="relative">
+      {/* Nameplate — same compact editorial header as News */}
+      <header className="relative border-b border-border/60 bg-surface/20">
+        <div className="mx-auto max-w-[1400px] px-4 md:px-8">
+          <div className="flex items-center justify-between border-b border-border/40 py-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <span>
+              {mounted
+                ? new Date().toLocaleDateString(undefined, {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : ""}
+            </span>
+            <span className="hidden sm:inline">Esports HQ · {esportsGames.length} circuits</span>
+            <span className="flex items-center gap-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[oklch(var(--live))] opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[oklch(var(--live))]" />
+              </span>
+              {live.length} live now
+            </span>
           </div>
-          <h1 className="mt-3 font-display text-4xl font-bold md:text-5xl">
-            Live scores. Real standings. <span className="gradient-text">No tabs.</span>
-          </h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Everything happening in Valorant, CS2, League and Dota — current matches, upcoming
-            tournaments, team standings and the players setting the meta.
-          </p>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Pill active={filter === "all"} onClick={() => setFilter("all")}>
-              All games
-            </Pill>
-            {esportsGames.map((g) => (
-              <Pill key={g} active={filter === g} onClick={() => setFilter(g)}>
-                {g}
-              </Pill>
-            ))}
+          <div className="flex flex-col items-center py-6 text-center md:py-8">
+            <div className="font-mono-accent text-[10px] uppercase tracking-[0.4em] text-primary">
+              The Gameverse Scoreboard
+            </div>
+            <h1
+              className="mt-2 font-display font-bold leading-none tracking-tight"
+              style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
+            >
+              Live<span className="italic font-medium text-muted-foreground"> &amp; </span>
+              <span className="gradient-text">Standings</span>
+            </h1>
+            <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="h-px w-8 bg-border" />
+              Scores, fixtures, tables and player ratings — refreshed continuously
+              <span className="h-px w-8 bg-border" />
+            </div>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-[1400px] px-4 py-12 md:px-8">
-        <SectionHeader
-          eyebrow="On now"
-          title="Live matches"
-          description="Score updates roll in every few seconds."
-        />
-        {live.length === 0 ? (
-          <EmptyRow>No live matches in this filter right now.</EmptyRow>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {live.map((m) => (
-              <MatchCard key={m.id} match={m} />
+      {/* Sticky filter bar — matches News */}
+      <div className="sticky top-16 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-[1400px] px-4 py-3 md:px-8">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0">
+            <Chip active={filter === "all"} onClick={() => setFilter("all")}>
+              All games
+            </Chip>
+            {esportsGames.map((g) => (
+              <Chip key={g} active={filter === g} onClick={() => setFilter(g)}>
+                {g}
+              </Chip>
             ))}
           </div>
-        )}
-      </section>
+        </div>
+      </div>
 
-      <section className="mx-auto max-w-[1400px] px-4 pb-12 md:px-8">
-        <SectionHeader eyebrow="Coming up" title="Upcoming matches" />
-        {upcoming.length === 0 ? (
-          <EmptyRow>Nothing scheduled yet.</EmptyRow>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {upcoming.map((m) => (
-              <MatchCard key={m.id} match={m} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="mx-auto max-w-[1400px] px-4 pb-12 md:px-8">
-        <SectionHeader eyebrow="Recent" title="Latest results" />
-        {finished.length === 0 ? (
-          <EmptyRow>No recent results.</EmptyRow>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {finished.map((m) => (
-              <MatchCard key={m.id} match={m} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="mx-auto max-w-[1400px] px-4 pb-16 md:px-8 space-y-12">
-        {standingsGames.map((game) => (
-          <div key={game}>
-            <SectionHeader eyebrow="Standings" title={`${game} — Season Table`} />
-            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-              <StandingsTable game={game} />
-              <PlayersBoard game={game} />
+      <section className="mx-auto max-w-[1400px] px-4 py-12 md:px-8 md:py-16">
+        <SectionEyebrow icon={<Radio className="h-3.5 w-3.5" />} label="On Now · Live" />
+        <div className="mt-6">
+          {live.length === 0 ? (
+            <EmptyRow>No live matches in this filter right now.</EmptyRow>
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {live.map((m) => (
+                <MatchCard key={m.id} match={m} />
+              ))}
             </div>
+          )}
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-surface/30">
+        <div className="mx-auto max-w-[1400px] px-4 py-14 md:px-8">
+          <SectionEyebrow icon={<CalendarClock className="h-3.5 w-3.5" />} label="Coming Up" />
+          <div className="mt-6">
+            {upcoming.length === 0 ? (
+              <EmptyRow>Nothing scheduled yet.</EmptyRow>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {upcoming.map((m) => (
+                  <MatchCard key={m.id} match={m} />
+                ))}
+              </div>
+            )}
           </div>
-        ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1400px] px-4 py-14 md:px-8">
+        <SectionEyebrow icon={<Sparkles className="h-3.5 w-3.5" />} label="Latest Results" />
+        <div className="mt-6">
+          {finished.length === 0 ? (
+            <EmptyRow>No recent results.</EmptyRow>
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {finished.map((m) => (
+                <MatchCard key={m.id} match={m} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-surface/30">
+        <div className="mx-auto max-w-[1400px] space-y-14 px-4 py-16 md:px-8">
+          {standingsGames.map((game) => (
+            <div key={game}>
+              <SectionEyebrow
+                icon={<Trophy className="h-3.5 w-3.5" />}
+                label={`${game} · Season Table`}
+              />
+              <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <StandingsTable game={game} />
+                <PlayersBoard game={game} />
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
 }
 
-function Pill({
+function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-px w-10 bg-gradient-to-r from-primary to-transparent" />
+      <div className="flex items-center gap-1.5 font-mono-accent text-[11px] uppercase tracking-[0.32em] text-primary">
+        {icon}
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function Chip({
+  children,
   active,
   onClick,
-  children,
 }: {
+  children: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
-  children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+        "whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
         active
-          ? "border-primary/60 bg-primary/15 text-primary"
-          : "border-border bg-surface text-muted-foreground hover:text-foreground hover:border-primary/40",
+          ? "border-primary/60 bg-primary/15 text-primary shadow-glow"
+          : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
     >
       {children}
@@ -164,7 +220,7 @@ function Pill({
 
 function EmptyRow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-border bg-surface/40 text-sm text-muted-foreground">
+    <div className="flex h-28 items-center justify-center rounded-2xl border border-dashed border-border bg-surface/40 text-sm text-muted-foreground">
       {children}
     </div>
   );
@@ -173,9 +229,9 @@ function EmptyRow({ children }: { children: React.ReactNode }) {
 function StandingsTable({ game }: { game: EsportsGame }) {
   const teams = teamsByGame(game);
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-surface">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/40 backdrop-blur">
       <table className="w-full text-sm">
-        <thead className="bg-surface-2 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
+        <thead className="bg-surface/60 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
           <tr>
             <th className="px-4 py-3 text-left">#</th>
             <th className="px-4 py-3 text-left">Team</th>
@@ -187,7 +243,7 @@ function StandingsTable({ game }: { game: EsportsGame }) {
         </thead>
         <tbody>
           {teams.map((t, i) => (
-            <tr key={t.id} className="border-t border-border/60 hover:bg-surface-2/50">
+            <tr key={t.id} className="border-t border-border/60 hover:bg-surface/40">
               <td className="px-4 py-3 font-mono-accent text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </td>
@@ -240,8 +296,8 @@ function StandingsTable({ game }: { game: EsportsGame }) {
 function PlayersBoard({ game }: { game: EsportsGame }) {
   const players = playersByGame(game);
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-surface">
-      <div className="border-b border-border/60 bg-surface-2 px-4 py-2.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/40 backdrop-blur">
+      <div className="border-b border-border/60 bg-surface/60 px-4 py-2.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
         Top Players
       </div>
       <ul>
