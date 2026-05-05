@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Gamepad2, Newspaper, Trophy, Library, Search, Command, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { SearchDialog } from "./SearchDialog";
 
 const navItems = [
   { to: "/", label: "Home", icon: Gamepad2, hint: "00" },
@@ -21,6 +22,18 @@ export function TopNav() {
   });
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const activeKey =
     navItems.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)))?.to ?? "/";
