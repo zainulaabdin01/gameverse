@@ -71,8 +71,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -84,7 +82,5 @@ function RootComponent() {
       </main>
       <SiteFooter />
     </div>
-  );
-}
   );
 }
