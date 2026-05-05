@@ -62,6 +62,7 @@ export function TopNav() {
   }, []);
 
   return (
+    <>
     <header className="sticky top-0 z-40">
       {/* Animated hairline gradient divider */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px overflow-hidden">
