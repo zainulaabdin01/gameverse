@@ -203,6 +203,7 @@ export function TopNav() {
             </div>
             <button
               type="button"
+              onClick={() => setSearchOpen(true)}
               className="group hidden items-center gap-2 rounded-full border border-border/60 bg-surface/40 px-3 py-1.5 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:bg-surface/60 hover:text-foreground md:flex"
               aria-label="Search"
             >
@@ -226,6 +227,7 @@ export function TopNav() {
             <button
               type="button"
               aria-label="Search"
+              onClick={() => setSearchOpen(true)}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-surface/40 text-muted-foreground md:hidden"
             >
               <Search className="h-4 w-4" />
@@ -259,5 +261,9 @@ export function TopNav() {
         </nav>
       </div>
     </header>
+    <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+    </>
+  );
+}
   );
 }
