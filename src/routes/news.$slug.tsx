@@ -94,7 +94,7 @@ function ArticlePage() {
         <p className="mt-4 text-lg text-muted-foreground">{article.excerpt}</p>
 
         <div className="prose prose-invert mt-8 max-w-none text-base leading-relaxed">
-          {article.body.map((p, i) => (
+          {article.body.map((p: string, i: number) => (
             <p key={i} className="mb-5 text-foreground/90">
               {p}
             </p>
