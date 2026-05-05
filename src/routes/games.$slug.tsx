@@ -68,7 +68,7 @@ function GamePage() {
             <ArrowLeft className="h-4 w-4" /> Game Directory
           </Link>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {game.genres.map((g) => (
+            {game.genres.map((g: string) => (
               <span
                 key={g}
                 className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground backdrop-blur"
@@ -101,7 +101,7 @@ function GamePage() {
               <div className="mt-8">
                 <h2 className="font-display text-xl font-bold mb-4">Screenshots</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {game.screenshots.map((s, i) => (
+                  {game.screenshots.map((s: string, i: number) => (
                     <img
                       key={i}
                       src={s}
