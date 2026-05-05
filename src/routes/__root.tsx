@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { TopNav } from "@/components/TopNav";
 import { LiveTicker } from "@/components/LiveTicker";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -72,14 +72,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
+function RootComponent() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return (
     <div className="flex min-h-screen flex-col bg-background">
       <RouteProgress />
       <TopNav />
       <LiveTicker />
-      <main key={typeof window !== "undefined" ? window.location.pathname : "ssr"} className="flex-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <main key={pathname} className="flex-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <Outlet />
       </main>
       <SiteFooter />
     </div>
+  );
+}
   );
 }
