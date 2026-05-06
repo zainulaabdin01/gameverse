@@ -262,12 +262,16 @@ function NewsHub() {
 
 function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="h-px w-10 bg-gradient-to-r from-primary to-transparent" />
-      <div className="flex items-center gap-1.5 font-mono-accent text-[11px] uppercase tracking-[0.32em] text-primary">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 font-mono-accent text-[11px] uppercase tracking-[0.32em] text-primary">
+        <span className="h-px w-8 bg-primary" />
         {icon}
-        {label}
+        Section
       </div>
+      <h2 className="font-display text-2xl md:text-3xl font-bold leading-none tracking-tight">
+        {label}
+      </h2>
+      <span className="h-[2px] w-16 bg-gradient-to-r from-primary via-accent to-transparent" />
     </div>
   );
 }
