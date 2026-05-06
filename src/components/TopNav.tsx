@@ -20,7 +20,6 @@ export function TopNav() {
     width: 0,
     opacity: 0,
   });
-  const [hoverKey, setHoverKey] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
