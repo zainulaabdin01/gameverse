@@ -307,7 +307,6 @@ function HomePage() {
           muted
           playsInline
           preload="auto"
-          poster={ctaVideo.url}
           className="absolute inset-0 h-full w-full object-cover opacity-50"
         />
         {/* Color/atmosphere overlays */}
