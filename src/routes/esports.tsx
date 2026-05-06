@@ -126,8 +126,8 @@ function EsportsPage() {
             <EmptyRow>No live matches in this filter right now.</EmptyRow>
           ) : (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {live.map((m) => (
-                <MatchCard key={m.id} match={m} />
+              {live.map((m, i) => (
+                <MatchCard key={m.id} match={m} linkFieldReference={i === 0} />
               ))}
             </div>
           )}
@@ -142,8 +142,12 @@ function EsportsPage() {
               <EmptyRow>Nothing scheduled yet.</EmptyRow>
             ) : (
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {upcoming.map((m) => (
-                  <MatchCard key={m.id} match={m} />
+                {upcoming.map((m, i) => (
+                  <MatchCard
+                    key={m.id}
+                    match={m}
+                    linkFieldReference={live.length === 0 && i === 0}
+                  />
                 ))}
               </div>
             )}
@@ -321,9 +325,7 @@ function PlayersBoard({ game }: { game: EsportsGame }) {
             <div className="flex-1 min-w-0">
               <div className="font-display font-semibold leading-tight truncate">
                 {p.handle}
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
-                  {p.realName}
-                </span>
+                <span className="ml-2 text-xs font-normal text-muted-foreground">{p.realName}</span>
               </div>
               <div className="font-mono-accent text-[10px] uppercase text-muted-foreground">
                 {p.role} · {p.signature}

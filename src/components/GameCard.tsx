@@ -7,18 +7,17 @@ interface Props {
   game: Game;
   className?: string;
   size?: "sm" | "md" | "lg";
+  /** When true, renders the same visuals without a link (e.g. field reference pages). */
+  asStatic?: boolean;
+  /** When true, links to the Games field reference instead of the game detail route. */
+  linkFieldReference?: boolean;
 }
 
-export function GameCard({ game, className, size = "md" }: Props) {
-  return (
-    <Link
-      to="/games/$slug"
-      params={{ slug: game.slug }}
-      className={cn(
-        "group relative block overflow-hidden rounded-xl border border-border/60 bg-surface hover-lift",
-        className,
-      )}
-    >
+export function GameCard({ game, className, size = "md", asStatic, linkFieldReference }: Props) {
+  const shell =
+    "group relative block overflow-hidden rounded-xl border border-border/60 bg-surface hover-lift";
+  const inner = (
+    <>
       <div
         className={cn(
           "relative overflow-hidden",
@@ -49,6 +48,22 @@ export function GameCard({ game, className, size = "md" }: Props) {
           <span>{game.platforms.slice(0, 3).join(" / ")}</span>
         </div>
       </div>
+    </>
+  );
+
+  if (asStatic) {
+    return <div className={cn(shell, className)}>{inner}</div>;
+  }
+  if (linkFieldReference) {
+    return (
+      <Link to="/reference/games" className={cn(shell, className)}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/games/$slug" params={{ slug: game.slug }} className={cn(shell, className)}>
+      {inner}
     </Link>
   );
 }

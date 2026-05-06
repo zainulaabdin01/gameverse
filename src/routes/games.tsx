@@ -7,8 +7,18 @@ import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
 const GENRES: Genre[] = [
-  "Action", "RPG", "Shooter", "Strategy", "Adventure", "Sports",
-  "Racing", "Indie", "MMO", "Fighting", "Simulation", "Horror",
+  "Action",
+  "RPG",
+  "Shooter",
+  "Strategy",
+  "Adventure",
+  "Sports",
+  "Racing",
+  "Indie",
+  "MMO",
+  "Fighting",
+  "Simulation",
+  "Horror",
 ];
 const PLATFORMS: Platform[] = ["PC", "PS5", "Xbox", "Switch"];
 
@@ -59,8 +69,7 @@ function GameDirectory() {
         return filtered.sort((a, b) => a.title.localeCompare(b.title));
       default:
         return filtered.sort(
-          (a, b) =>
-            Number(!!b.trending) - Number(!!a.trending) || b.userScore - a.userScore,
+          (a, b) => Number(!!b.trending) - Number(!!a.trending) || b.userScore - a.userScore,
         );
     }
   }, [query, genre, platform, minRating, sort]);
@@ -137,7 +146,9 @@ function GameDirectory() {
               >
                 <option value="all">All platforms</option>
                 {PLATFORMS.map((p) => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
               </select>
               <select
@@ -194,8 +205,8 @@ function GameDirectory() {
         </div>
 
         <div className="mt-4 mb-6 text-sm text-muted-foreground">
-          <span className="text-foreground font-semibold">{results.length}</span>{" "}
-          game{results.length === 1 ? "" : "s"} found
+          <span className="text-foreground font-semibold">{results.length}</span> game
+          {results.length === 1 ? "" : "s"} found
         </div>
 
         {results.length === 0 ? (
@@ -204,8 +215,8 @@ function GameDirectory() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {results.map((g) => (
-              <GameCard key={g.slug} game={g} />
+            {results.map((g, i) => (
+              <GameCard key={g.slug} game={g} linkFieldReference={i === 0} />
             ))}
           </div>
         )}

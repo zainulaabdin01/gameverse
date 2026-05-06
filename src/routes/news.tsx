@@ -86,6 +86,14 @@ function NewsHub() {
                 : ""}
             </span>
             <span className="hidden sm:inline">Vol. IV · No. {sorted.length}</span>
+            {filtered.length === 0 && (
+              <Link
+                to="/reference/news"
+                className="text-primary hover:underline decoration-primary/50 underline-offset-4"
+              >
+                Field reference
+              </Link>
+            )}
             <span className="flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -100,8 +108,10 @@ function NewsHub() {
             <div className="font-mono-accent text-[10px] uppercase tracking-[0.4em] text-primary">
               The Gameverse Wire
             </div>
-            <h1 className="mt-2 font-display font-bold leading-none tracking-tight"
-                style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}>
+            <h1
+              className="mt-2 font-display font-bold leading-none tracking-tight"
+              style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
+            >
               News<span className="italic font-medium text-muted-foreground"> &amp; </span>
               <span className="gradient-text">Reports</span>
             </h1>
@@ -157,7 +167,9 @@ function NewsHub() {
             >
               <option value="all">All sources</option>
               {sources.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
           </div>
@@ -188,7 +200,12 @@ function NewsHub() {
             <div className="mt-6 grid gap-6 lg:grid-cols-12">
               {lead && (
                 <div className="lg:col-span-8">
-                  <ArticleCard article={lead} variant="featured" className="h-full" />
+                  <ArticleCard
+                    article={lead}
+                    variant="featured"
+                    className="h-full"
+                    linkFieldReference
+                  />
                 </div>
               )}
               <aside className="flex flex-col gap-6 lg:col-span-4">
@@ -221,8 +238,13 @@ function NewsHub() {
                         params={{ slug: a.slug }}
                         className="group flex items-start gap-4 p-4 transition-colors hover:bg-surface/60"
                       >
-                        <span className="font-display text-3xl font-bold leading-none text-transparent"
-                              style={{ WebkitTextStroke: "1px color-mix(in oklab, var(--primary) 70%, transparent)" }}>
+                        <span
+                          className="font-display text-3xl font-bold leading-none text-transparent"
+                          style={{
+                            WebkitTextStroke:
+                              "1px color-mix(in oklab, var(--primary) 70%, transparent)",
+                          }}
+                        >
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div className="min-w-0 flex-1">
@@ -258,7 +280,6 @@ function NewsHub() {
     </div>
   );
 }
-
 
 function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (

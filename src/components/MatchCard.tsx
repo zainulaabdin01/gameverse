@@ -8,9 +8,13 @@ import { cn } from "@/lib/utils";
 interface Props {
   match: Match;
   className?: string;
+  /** When true, renders the same visuals without a link (e.g. field reference pages). */
+  asStatic?: boolean;
+  /** When true, links to the Esports field reference instead of the match detail route. */
+  linkFieldReference?: boolean;
 }
 
-export function MatchCard({ match, className }: Props) {
+export function MatchCard({ match, className, asStatic, linkFieldReference }: Props) {
   const a = getTeam(match.teamAId);
   const b = getTeam(match.teamBId);
   const isLive = match.status === "live";
@@ -18,15 +22,11 @@ export function MatchCard({ match, className }: Props) {
   const winner = isFinished ? (match.scoreA > match.scoreB ? "a" : "b") : null;
   const mounted = useMounted();
 
-  return (
-    <Link
-      to="/esports/$matchId"
-      params={{ matchId: match.id }}
-      className={cn(
-        "group flex flex-col gap-3 rounded-xl border border-border/60 bg-surface p-4 hover-lift transition-colors hover:border-primary/40",
-        className,
-      )}
-    >
+  const shell =
+    "group flex flex-col gap-3 rounded-xl border border-border/60 bg-surface p-4 hover-lift transition-colors hover:border-primary/40";
+
+  const inner = (
+    <>
       <div className="flex items-center justify-between">
         <span className="font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
           {match.game} · {match.tournament}
@@ -70,6 +70,22 @@ export function MatchCard({ match, className }: Props) {
           {match.viewers && <span>👁 {formatViewers(match.viewers)} watching</span>}
         </div>
       )}
+    </>
+  );
+
+  if (asStatic) {
+    return <div className={cn(shell, className)}>{inner}</div>;
+  }
+  if (linkFieldReference) {
+    return (
+      <Link to="/reference/esports" className={cn(shell, className)}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/esports/$matchId" params={{ matchId: match.id }} className={cn(shell, className)}>
+      {inner}
     </Link>
   );
 }

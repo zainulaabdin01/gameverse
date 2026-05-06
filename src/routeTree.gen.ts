@@ -13,6 +13,9 @@ import { Route as NewsRouteImport } from './routes/news'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as EsportsRouteImport } from './routes/esports'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReferenceNewsRouteImport } from './routes/reference.news'
+import { Route as ReferenceGamesRouteImport } from './routes/reference.games'
+import { Route as ReferenceEsportsRouteImport } from './routes/reference.esports'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as EsportsMatchIdRouteImport } from './routes/esports.$matchId'
@@ -35,6 +38,21 @@ const EsportsRoute = EsportsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferenceNewsRoute = ReferenceNewsRouteImport.update({
+  id: '/reference/news',
+  path: '/reference/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferenceGamesRoute = ReferenceGamesRouteImport.update({
+  id: '/reference/games',
+  path: '/reference/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferenceEsportsRoute = ReferenceEsportsRouteImport.update({
+  id: '/reference/esports',
+  path: '/reference/esports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsSlugRoute = NewsSlugRouteImport.update({
@@ -61,6 +79,9 @@ export interface FileRoutesByFullPath {
   '/esports/$matchId': typeof EsportsMatchIdRoute
   '/games/$slug': typeof GamesSlugRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/reference/esports': typeof ReferenceEsportsRoute
+  '/reference/games': typeof ReferenceGamesRoute
+  '/reference/news': typeof ReferenceNewsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +91,9 @@ export interface FileRoutesByTo {
   '/esports/$matchId': typeof EsportsMatchIdRoute
   '/games/$slug': typeof GamesSlugRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/reference/esports': typeof ReferenceEsportsRoute
+  '/reference/games': typeof ReferenceGamesRoute
+  '/reference/news': typeof ReferenceNewsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +104,9 @@ export interface FileRoutesById {
   '/esports/$matchId': typeof EsportsMatchIdRoute
   '/games/$slug': typeof GamesSlugRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/reference/esports': typeof ReferenceEsportsRoute
+  '/reference/games': typeof ReferenceGamesRoute
+  '/reference/news': typeof ReferenceNewsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +118,9 @@ export interface FileRouteTypes {
     | '/esports/$matchId'
     | '/games/$slug'
     | '/news/$slug'
+    | '/reference/esports'
+    | '/reference/games'
+    | '/reference/news'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +130,9 @@ export interface FileRouteTypes {
     | '/esports/$matchId'
     | '/games/$slug'
     | '/news/$slug'
+    | '/reference/esports'
+    | '/reference/games'
+    | '/reference/news'
   id:
     | '__root__'
     | '/'
@@ -109,6 +142,9 @@ export interface FileRouteTypes {
     | '/esports/$matchId'
     | '/games/$slug'
     | '/news/$slug'
+    | '/reference/esports'
+    | '/reference/games'
+    | '/reference/news'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,6 +152,9 @@ export interface RootRouteChildren {
   EsportsRoute: typeof EsportsRouteWithChildren
   GamesRoute: typeof GamesRouteWithChildren
   NewsRoute: typeof NewsRouteWithChildren
+  ReferenceEsportsRoute: typeof ReferenceEsportsRoute
+  ReferenceGamesRoute: typeof ReferenceGamesRoute
+  ReferenceNewsRoute: typeof ReferenceNewsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,6 +185,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference/news': {
+      id: '/reference/news'
+      path: '/reference/news'
+      fullPath: '/reference/news'
+      preLoaderRoute: typeof ReferenceNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference/games': {
+      id: '/reference/games'
+      path: '/reference/games'
+      fullPath: '/reference/games'
+      preLoaderRoute: typeof ReferenceGamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference/esports': {
+      id: '/reference/esports'
+      path: '/reference/esports'
+      fullPath: '/reference/esports'
+      preLoaderRoute: typeof ReferenceEsportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news/$slug': {
@@ -208,7 +268,19 @@ const rootRouteChildren: RootRouteChildren = {
   EsportsRoute: EsportsRouteWithChildren,
   GamesRoute: GamesRouteWithChildren,
   NewsRoute: NewsRouteWithChildren,
+  ReferenceEsportsRoute: ReferenceEsportsRoute,
+  ReferenceGamesRoute: ReferenceGamesRoute,
+  ReferenceNewsRoute: ReferenceNewsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
