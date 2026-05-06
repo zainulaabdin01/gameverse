@@ -7,6 +7,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { articles, featuredArticles } from "@/data/news";
 import { featuredGames, trendingGames } from "@/data/games";
 import { liveMatches, upcomingMatches } from "@/data/esports";
+import ctaVideo from "@/assets/cta-bg.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
