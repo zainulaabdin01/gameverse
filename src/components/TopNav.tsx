@@ -156,7 +156,6 @@ export function TopNav() {
             />
             {navItems.map((item) => {
               const active = activeKey === item.to;
-              const isHot = (hoverKey ?? activeKey) === item.to;
               const Icon = item.icon;
               return (
                 <Link
@@ -165,27 +164,24 @@ export function TopNav() {
                   ref={(el) => {
                     itemRefs.current[item.to] = el;
                   }}
-                  onMouseEnter={() => setHoverKey(item.to)}
                   className={cn(
                     "relative z-10 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                    isHot
+                    active
                       ? "text-primary-foreground"
-                      : active
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-3.5 w-3.5 transition-transform duration-300",
-                      isHot ? "scale-110 -rotate-6" : ""
+                      active ? "scale-110 -rotate-6" : ""
                     )}
                   />
                   {item.label}
                   <span
                     className={cn(
                       "font-mono-accent text-[9px] tracking-widest transition-opacity",
-                      isHot ? "text-primary-foreground/70" : "text-muted-foreground/60"
+                      active ? "text-primary-foreground/70" : "text-muted-foreground/60"
                     )}
                   >
                     {item.hint}
