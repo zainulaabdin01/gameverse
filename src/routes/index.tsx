@@ -7,6 +7,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { articles, featuredArticles } from "@/data/news";
 import { featuredGames, trendingGames } from "@/data/games";
 import { liveMatches, upcomingMatches } from "@/data/esports";
+import ctaVideo from "@/assets/cta-bg.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -298,8 +299,21 @@ function HomePage() {
           FINAL CTA
           ============================================================ */}
       <section className="relative overflow-hidden">
-        <div className="bg-aurora absolute inset-0 opacity-40" />
-        <div className="relative mx-auto max-w-[1280px] px-6 py-24 md:px-10 md:py-32 text-center">
+        {/* Background video */}
+        <video
+          src={ctaVideo.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover opacity-50"
+        />
+        {/* Color/atmosphere overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background" />
+        <div className="bg-aurora absolute inset-0 opacity-50 mix-blend-screen" />
+        <div className="bg-grid absolute inset-0 opacity-[0.12]" />
+        <div className="relative mx-auto max-w-[1280px] px-6 py-28 md:px-10 md:py-40 text-center">
           <div className="font-mono-accent text-[11px] uppercase tracking-[0.3em] text-accent">
             ▍ Welcome to the verse
           </div>

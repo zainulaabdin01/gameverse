@@ -20,7 +20,6 @@ export function TopNav() {
     width: 0,
     opacity: 0,
   });
-  const [hoverKey, setHoverKey] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -38,10 +37,9 @@ export function TopNav() {
   const activeKey =
     navItems.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)))?.to ?? "/";
 
-  // Move the magic pill indicator
+  // Move the magic pill indicator only when the active route changes (after click)
   useEffect(() => {
-    const key = hoverKey ?? activeKey;
-    const el = itemRefs.current[key];
+    const el = itemRefs.current[activeKey];
     const parent = navRef.current;
     if (!el || !parent) return;
     const elRect = el.getBoundingClientRect();
@@ -51,7 +49,7 @@ export function TopNav() {
       width: elRect.width,
       opacity: 1,
     });
-  }, [hoverKey, activeKey, pathname]);
+  }, [activeKey, pathname]);
 
   // Scroll-aware shrink/border
   useEffect(() => {
@@ -141,7 +139,6 @@ export function TopNav() {
           {/* NAV PILL with magic indicator */}
           <nav
             ref={navRef}
-            onMouseLeave={() => setHoverKey(null)}
             className="relative mx-auto hidden items-center rounded-full border border-border/60 bg-surface/40 p-1 backdrop-blur md:flex"
           >
             {/* Magic moving indicator */}
@@ -157,7 +154,6 @@ export function TopNav() {
             />
             {navItems.map((item) => {
               const active = activeKey === item.to;
-              const isHot = (hoverKey ?? activeKey) === item.to;
               const Icon = item.icon;
               return (
                 <Link
@@ -166,27 +162,24 @@ export function TopNav() {
                   ref={(el) => {
                     itemRefs.current[item.to] = el;
                   }}
-                  onMouseEnter={() => setHoverKey(item.to)}
                   className={cn(
                     "relative z-10 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                    isHot
+                    active
                       ? "text-primary-foreground"
-                      : active
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-3.5 w-3.5 transition-transform duration-300",
-                      isHot ? "scale-110 -rotate-6" : ""
+                      active ? "scale-110 -rotate-6" : ""
                     )}
                   />
                   {item.label}
                   <span
                     className={cn(
                       "font-mono-accent text-[9px] tracking-widest transition-opacity",
-                      isHot ? "text-primary-foreground/70" : "text-muted-foreground/60"
+                      active ? "text-primary-foreground/70" : "text-muted-foreground/60"
                     )}
                   >
                     {item.hint}
