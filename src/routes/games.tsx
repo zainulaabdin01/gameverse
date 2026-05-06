@@ -68,8 +68,13 @@ function GameDirectory() {
   return (
     <div className="relative">
       {/* Nameplate — same editorial header as News / Esports */}
-      <header className="relative border-b border-border/60 bg-surface/20">
-        <div className="mx-auto max-w-[1400px] px-4 md:px-8">
+      <header className="relative overflow-hidden border-b border-border/60 bg-surface/20">
+        <div className="bg-aurora absolute inset-0 opacity-40" />
+        <div className="bg-grid absolute inset-0 opacity-[0.12]" />
+        <div className="absolute -top-32 -left-32 h-[420px] w-[420px] rounded-full bg-primary/15 blur-[110px]" />
+        <div className="absolute -bottom-32 -right-32 h-[420px] w-[420px] rounded-full bg-accent/15 blur-[110px]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-background" />
+        <div className="relative mx-auto max-w-[1400px] px-4 md:px-8">
           <div className="flex items-center justify-between border-b border-border/40 py-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
             <span>
               {mounted
