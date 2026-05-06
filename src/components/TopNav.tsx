@@ -139,7 +139,6 @@ export function TopNav() {
           {/* NAV PILL with magic indicator */}
           <nav
             ref={navRef}
-            onMouseLeave={() => setHoverKey(null)}
             className="relative mx-auto hidden items-center rounded-full border border-border/60 bg-surface/40 p-1 backdrop-blur md:flex"
           >
             {/* Magic moving indicator */}
