@@ -38,10 +38,9 @@ export function TopNav() {
   const activeKey =
     navItems.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)))?.to ?? "/";
 
-  // Move the magic pill indicator
+  // Move the magic pill indicator only when the active route changes (after click)
   useEffect(() => {
-    const key = hoverKey ?? activeKey;
-    const el = itemRefs.current[key];
+    const el = itemRefs.current[activeKey];
     const parent = navRef.current;
     if (!el || !parent) return;
     const elRect = el.getBoundingClientRect();
@@ -51,7 +50,7 @@ export function TopNav() {
       width: elRect.width,
       opacity: 1,
     });
-  }, [hoverKey, activeKey, pathname]);
+  }, [activeKey, pathname]);
 
   // Scroll-aware shrink/border
   useEffect(() => {
