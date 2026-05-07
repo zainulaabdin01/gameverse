@@ -1,7 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { BookOpen, Radio, Shield, Trophy, Users } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Radio, Shield, Trophy, Users } from "lucide-react";
 import { MatchCard } from "@/components/MatchCard";
-import { SectionHeader } from "@/components/SectionHeader";
+import {
+  CodeBlock,
+  FieldRow,
+  FieldTable,
+  RefSectionHeading,
+  ReferenceShell,
+} from "@/components/reference/ReferenceShell";
 import { getTeam } from "@/data/esports";
 import type { Match, Player, Team } from "@/data/esports";
 import { useMounted } from "@/hooks/use-mounted";
@@ -81,50 +87,10 @@ const mapSummary = [
 ];
 
 const playerStats: Player[] = [
-  {
-    id: "reference-p1",
-    handle: "Phantom",
-    realName: "Eli Park",
-    teamId: "sentinel",
-    game: "Valorant",
-    role: "Duelist",
-    rating: 1.34,
-    kda: 1.62,
-    signature: "Jett",
-  },
-  {
-    id: "reference-p2",
-    handle: "Aegis",
-    realName: "Noah Price",
-    teamId: "sentinel",
-    game: "Valorant",
-    role: "Initiator",
-    rating: 1.22,
-    kda: 1.41,
-    signature: "Sova",
-  },
-  {
-    id: "reference-p3",
-    handle: "Aria",
-    realName: "Mia Voss",
-    teamId: "iron-maple",
-    game: "Valorant",
-    role: "Controller",
-    rating: 1.21,
-    kda: 1.39,
-    signature: "Omen",
-  },
-  {
-    id: "reference-p4",
-    handle: "Iris",
-    realName: "Lena Park",
-    teamId: "iron-maple",
-    game: "Valorant",
-    role: "Sentinel",
-    rating: 1.12,
-    kda: 1.18,
-    signature: "Killjoy",
-  },
+  { id: "p1", handle: "Phantom", realName: "Eli Park", teamId: "sentinel", game: "Valorant", role: "Duelist", rating: 1.34, kda: 1.62, signature: "Jett" },
+  { id: "p2", handle: "Aegis", realName: "Noah Price", teamId: "sentinel", game: "Valorant", role: "Initiator", rating: 1.22, kda: 1.41, signature: "Sova" },
+  { id: "p3", handle: "Aria", realName: "Mia Voss", teamId: "iron-maple", game: "Valorant", role: "Controller", rating: 1.21, kda: 1.39, signature: "Omen" },
+  { id: "p4", handle: "Iris", realName: "Lena Park", teamId: "iron-maple", game: "Valorant", role: "Sentinel", rating: 1.12, kda: 1.18, signature: "Killjoy" },
 ];
 
 const standingsSnapshot: Team[] = [
@@ -137,12 +103,6 @@ const standingsSnapshot: Team[] = [
 const teamA = getTeam(featuredMatch.teamAId);
 const teamB = getTeam(featuredMatch.teamBId);
 
-const seriesSnapshot = {
-  objectiveControl: "Sentinel 56% · Iron Maple 44%",
-  firstKills: "Sentinel 18 · Iron Maple 14",
-  avgRoundTime: "1m 29s",
-};
-
 const tournamentSnapshot = {
   stage: "Upper Final",
   prizePool: "$2,000,000",
@@ -150,92 +110,103 @@ const tournamentSnapshot = {
   patch: "v9.04",
 };
 
-const sampleUpcomingMatch: Match = {
-  id: "reference-upcoming-sample",
-  game: "CS2",
-  tournament: "CS2 Paris Major · Reference",
-  status: "upcoming",
-  startsAt: new Date(Date.now() + 90 * 60_000).toISOString(),
-  teamAId: "vexar",
-  teamBId: "north-star",
-  scoreA: 0,
-  scoreB: 0,
-  format: "BO3",
-};
+const sampleType = `export interface Match {
+  id: string;
+  game: EsportsGame;        // Valorant | CS2 | LoL | Dota 2
+  tournament: string;
+  status: "live" | "upcoming" | "finished";
+  startsAt: string;         // ISO 8601
+  teamAId: string;          // FK -> Team.id
+  teamBId: string;
+  scoreA: number;
+  scoreB: number;
+  format: string;           // "BO3", "BO5"
+  currentMap?: string;      // live ticker
+  viewers?: number;         // live concurrency
+}`;
+
+const sampleJson = `{
+  "id": "vct-2026-uf-sen-irm",
+  "game": "Valorant",
+  "tournament": "Valor Arena Champions · Upper Final",
+  "status": "live",
+  "startsAt": "2026-05-07T18:30:00.000Z",
+  "teamAId": "sentinel",
+  "teamBId": "iron-maple",
+  "scoreA": 2,
+  "scoreB": 1,
+  "format": "BO5",
+  "currentMap": "Map 4 — Haven (8:6)",
+  "viewers": 512000
+}`;
+
+const sections = [
+  { id: "scoreboard", index: "01", label: "Live scoreboard hero" },
+  { id: "series", index: "02", label: "Series & player stats" },
+  { id: "standings", index: "03", label: "Standings snapshot" },
+  { id: "rails", index: "04", label: "Match card variants" },
+  { id: "schema", index: "05", label: "Schema & sample payload" },
+  { id: "mapping", index: "06", label: "Backend mapping" },
+];
 
 function EsportsReferencePage() {
   const mounted = useMounted();
 
   return (
-    <div className="relative">
-      <header className="relative overflow-hidden border-b border-border/60 bg-surface/20">
-        <div className="bg-aurora absolute inset-0 opacity-40" />
-        <div className="bg-grid absolute inset-0 opacity-[0.12]" />
-        <div className="absolute -top-32 -left-32 h-[420px] w-[420px] rounded-full bg-primary/15 blur-[110px]" />
-        <div className="absolute -bottom-32 -right-32 h-[420px] w-[420px] rounded-full bg-accent/15 blur-[110px]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-background" />
-        <div className="relative mx-auto max-w-[1400px] px-4 md:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 py-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-            <span>
-              {mounted
-                ? new Date().toLocaleDateString(undefined, {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : ""}
-            </span>
-            <span className="flex items-center gap-2">
-              <BookOpen className="h-3 w-3 text-primary" />
-              Reference · Match detail
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center py-6 text-center md:py-8">
-            <div className="font-mono-accent text-[10px] uppercase tracking-[0.4em] text-primary">
-              Implementation guide
-            </div>
-            <h1
-              className="mt-2 font-display font-bold leading-none tracking-tight"
-              style={{ fontSize: "clamp(2rem, 5.5vw, 3.25rem)" }}
-            >
-              Esports<span className="italic font-medium text-muted-foreground"> detail </span>
-              <span className="gradient-text">showcase</span>
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
-              A full tournament-match detail composition with scoreboard hero, series intelligence,
-              player stats, and linked match rails.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs">
-              <Link
-                to="/esports"
-                className="rounded-full border border-border/60 bg-surface/60 px-4 py-2 font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-              >
-                ← Back to Esports hub
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[1400px] space-y-16 px-4 py-12 md:px-8 md:py-16">
-        <section className="overflow-hidden rounded-3xl border border-border/60 bg-surface/35 p-6 md:p-8">
+    <ReferenceShell
+      domain="Esports"
+      domainColor="#fb7185"
+      backTo="/esports"
+      backLabel="← Back to Esports hub"
+      title={
+        <>
+          The <span className="gradient-text">Esports</span>
+          <br />
+          match blueprint
+        </>
+      }
+      description="Live scoreboards, post-match recaps, standings tables, and player telemetry — every esports surface derives from the Match, Team, and Player models documented here."
+      stats={[
+        { label: "Models", value: "3" },
+        { label: "Statuses", value: "live · upcoming · final" },
+        { label: "Card variants", value: "3" },
+        { label: "Routes", value: "/esports/$matchId" },
+      ]}
+      sections={sections}
+    >
+      <section className="space-y-6">
+        <RefSectionHeading
+          id="scoreboard"
+          index="01"
+          eyebrow="Scoreboard"
+          title="Live match hero"
+          description="The detail page leads with the live scoreboard, format/map context, and tournament metadata aside."
+        />
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-surface/35 p-6 md:p-8">
           <div className="grid gap-6 lg:grid-cols-12">
             <div className="space-y-5 lg:col-span-8">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-[oklch(var(--live)/0.15)] px-3 py-1 font-mono-accent text-[10px] uppercase tracking-wider text-[oklch(var(--live))]">
-                  LIVE NOW
+                <span className="flex items-center gap-1.5 rounded-full bg-[oklch(var(--live)/0.15)] px-3 py-1 font-mono-accent text-[10px] uppercase tracking-wider text-[oklch(var(--live))]">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[oklch(var(--live))] opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[oklch(var(--live))]" />
+                  </span>
+                  LIVE
                 </span>
                 <span className="font-mono-accent text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                   {featuredMatch.tournament}
+                </span>
+                <span className="ml-auto font-mono-accent text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {featuredMatch.viewers?.toLocaleString()} watching
                 </span>
               </div>
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-2xl border border-border/60 bg-background/50 p-5">
                 <TeamBadge team={teamA} />
                 <div className="text-center">
                   <div className="font-display text-4xl font-bold tabular-nums md:text-5xl">
-                    {featuredMatch.scoreA} : {featuredMatch.scoreB}
+                    <span className="text-primary">{featuredMatch.scoreA}</span>
+                    <span className="px-2 text-muted-foreground/50">:</span>
+                    <span className="text-accent">{featuredMatch.scoreB}</span>
                   </div>
                   <p className="mt-1 font-mono-accent text-[10px] uppercase tracking-[0.26em] text-muted-foreground">
                     {featuredMatch.format} · {featuredMatch.currentMap}
@@ -244,18 +215,21 @@ function EsportsReferencePage() {
                 <TeamBadge team={teamB} align="right" />
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
-                <InfoPill title="Objective control" value={seriesSnapshot.objectiveControl} />
-                <InfoPill title="First kills" value={seriesSnapshot.firstKills} />
-                <InfoPill title="Avg round time" value={seriesSnapshot.avgRoundTime} />
+                <InfoPill title="Objective control" value="SEN 56% · IRM 44%" />
+                <InfoPill title="First kills" value="SEN 18 · IRM 14" />
+                <InfoPill title="Avg round time" value="1m 29s" />
               </div>
             </div>
 
             <aside className="space-y-3 rounded-2xl border border-border/60 bg-background/45 p-5 lg:col-span-4">
-              <h3 className="font-display text-xl font-semibold">Tournament snapshot</h3>
-              <p className="text-sm text-muted-foreground">
-                {mounted ? new Date(featuredMatch.startsAt).toLocaleString() : ""} · {featuredMatch.viewers?.toLocaleString()} live viewers
+              <div className="flex items-center gap-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-primary">
+                <Trophy className="h-3.5 w-3.5" /> Tournament
+              </div>
+              <p className="font-display text-xl font-semibold leading-tight">{featuredMatch.tournament}</p>
+              <p className="text-xs text-muted-foreground">
+                {mounted ? new Date(featuredMatch.startsAt).toLocaleString() : ""}
               </p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
                 <li><span className="text-foreground">Stage</span> — {tournamentSnapshot.stage}</li>
                 <li><span className="text-foreground">Prize pool</span> — {tournamentSnapshot.prizePool}</li>
                 <li><span className="text-foreground">Venue</span> — {tournamentSnapshot.location}</li>
@@ -263,186 +237,203 @@ function EsportsReferencePage() {
               </ul>
             </aside>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section>
-          <SectionHeader
-            index="01"
-            eyebrow="Series detail modules"
-            title="Map summary and player stat table"
-            description="A convincing match detail page layers per-map outcomes with compact player telemetry."
-          />
-          <div className="grid gap-6 xl:grid-cols-12">
-            <div className="space-y-6 xl:col-span-7">
-              <div className="rounded-2xl border border-border/60 bg-background/45 p-5">
-                <SectionEyebrow icon={<Radio className="h-3.5 w-3.5" />} label="Map / series summary" />
-                <div className="mt-4 space-y-2">
-                  {mapSummary.map((item) => (
-                    <div
-                      key={item.map}
-                      className="flex items-center justify-between rounded-lg border border-border/60 bg-surface/40 px-4 py-3 text-sm"
-                    >
+      <section className="space-y-6">
+        <RefSectionHeading
+          id="series"
+          index="02"
+          eyebrow="Series detail"
+          title="Map summary & player table"
+          description="Per-map outcomes plus compact player telemetry; both share team FKs with the scoreboard."
+        />
+        <div className="grid gap-6 xl:grid-cols-12">
+          <div className="space-y-6 xl:col-span-7">
+            <div className="rounded-2xl border border-border/60 bg-background/45 p-5">
+              <div className="flex items-center gap-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-primary">
+                <Radio className="h-3.5 w-3.5" /> Map / series summary
+              </div>
+              <div className="mt-4 space-y-2">
+                {mapSummary.map((item, i) => (
+                  <div
+                    key={item.map}
+                    className="flex items-center justify-between rounded-lg border border-border/60 bg-surface/40 px-4 py-3 text-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono-accent text-[10px] text-muted-foreground">M{i + 1}</span>
                       <span className="font-medium">{item.map}</span>
-                      <span className="text-muted-foreground">{item.result} · {item.winner}</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono tabular-nums text-foreground/90">{item.result}</span>
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
+                        {item.winner}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/45">
-                <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-                  <SectionEyebrow icon={<Users className="h-3.5 w-3.5" />} label="Player stats" />
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[540px] text-sm">
-                    <thead className="bg-surface/50 text-left font-mono-accent text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                      <tr>
-                        <th className="px-4 py-3">Player</th>
-                        <th className="px-4 py-3">Team</th>
-                        <th className="px-4 py-3">Role</th>
-                        <th className="px-4 py-3">Rating</th>
-                        <th className="px-4 py-3">KDA</th>
-                        <th className="px-4 py-3">Signature</th>
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/45">
+              <div className="flex items-center gap-2 border-b border-border/60 bg-surface/40 px-5 py-3 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-primary">
+                <Users className="h-3.5 w-3.5" /> Player stats
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[540px] text-sm">
+                  <thead className="text-left font-mono-accent text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3">Player</th>
+                      <th className="px-4 py-3">Team</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3 text-right">Rating</th>
+                      <th className="px-4 py-3 text-right">KDA</th>
+                      <th className="px-4 py-3">Signature</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {playerStats.map((player) => (
+                      <tr key={player.id} className="border-t border-border/50 transition-colors hover:bg-surface/30">
+                        <td className="px-4 py-3 font-medium">{player.handle}</td>
+                        <td className="px-4 py-3">
+                          <span className="rounded-md px-1.5 py-0.5 text-xs font-bold text-background" style={{ background: getTeam(player.teamId).logoColor }}>
+                            {getTeam(player.teamId).tag}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{player.role}</td>
+                        <td className="px-4 py-3 text-right font-mono tabular-nums text-foreground/90">{player.rating.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-right font-mono tabular-nums text-muted-foreground">{player.kda.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{player.signature}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {playerStats.map((player) => (
-                        <tr key={player.id} className="border-t border-border/50">
-                          <td className="px-4 py-3 font-medium">{player.handle}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{getTeam(player.teamId).tag}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{player.role}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{player.rating.toFixed(2)}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{player.kda.toFixed(2)}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{player.signature}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
+          </div>
 
-            <aside className="space-y-4 xl:col-span-5">
-              <div className="rounded-2xl border border-border/60 bg-surface/40 p-5">
-                <SectionEyebrow icon={<Shield className="h-3.5 w-3.5" />} label="Standings snapshot" />
-                <div className="mt-4 space-y-2">
-                  {standingsSnapshot.map((team) => (
-                    <div key={team.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-2 rounded-lg border border-border/60 bg-background/45 px-3 py-2 text-sm">
-                      <span className="font-medium">{team.name}</span>
-                      <span className="text-muted-foreground">{team.wins}-{team.losses}</span>
-                      <span className="font-mono-accent text-xs text-primary">{team.points} pts</span>
+          <aside id="standings" className="space-y-4 scroll-mt-24 xl:col-span-5">
+            <div className="rounded-2xl border border-border/60 bg-surface/40 p-5">
+              <div className="flex items-center gap-2 font-mono-accent text-[10px] uppercase tracking-[0.28em] text-primary">
+                <Shield className="h-3.5 w-3.5" /> Standings snapshot
+              </div>
+              <div className="mt-4 space-y-2">
+                {standingsSnapshot.map((team, i) => (
+                  <div key={team.id} className="grid grid-cols-[24px_1fr_auto_auto] items-center gap-3 rounded-lg border border-border/60 bg-background/45 px-3 py-2 text-sm">
+                    <span className="font-mono-accent text-[11px] text-muted-foreground">#{i + 1}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="h-6 w-6 flex-shrink-0 rounded-md text-center text-[10px] font-bold leading-6 text-background" style={{ background: team.logoColor }}>
+                        {team.tag}
+                      </span>
+                      <span className="truncate font-medium">{team.name}</span>
                     </div>
+                    <span className="font-mono tabular-nums text-muted-foreground">{team.wins}-{team.losses}</span>
+                    <span className="font-mono-accent text-xs text-primary">{team.points}p</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1 border-t border-border/60 pt-3">
+                <span className="font-mono-accent text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Recent form (SEN)</span>
+                <div className="ml-auto flex gap-1">
+                  {standingsSnapshot[0].formStreak.map((r, i) => (
+                    <span
+                      key={i}
+                      className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${
+                        r === "W" ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"
+                      }`}
+                    >
+                      {r}
+                    </span>
                   ))}
                 </div>
               </div>
-            </aside>
-          </div>
-        </section>
+            </div>
+          </aside>
+        </div>
+      </section>
 
-        <section>
-          <SectionHeader
-            index="02"
-            eyebrow="Related match rails"
-            title="Upcoming and completed match cards"
-            description="Use existing MatchCard variants for adjacent context and quick navigation."
-          />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <MatchCard match={sampleUpcomingMatch} asStatic />
-            {relatedMatches.map((match) => (
-              <MatchCard key={match.id} match={match} asStatic />
-            ))}
-          </div>
-        </section>
+      <section className="space-y-6">
+        <RefSectionHeading
+          id="rails"
+          index="04"
+          eyebrow="Discovery"
+          title="MatchCard variants"
+          description="The same MatchCard renders the three states with subtle status accents."
+        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {relatedMatches.map((match) => (
+            <MatchCard key={match.id} match={match} asStatic />
+          ))}
+        </div>
+      </section>
 
-        <section className="border-t border-border/60 pt-16">
-          <SectionHeader
-            index="03"
-            eyebrow="Backend contract"
-            title="Match detail + listing contract"
-            description="Keep foreign keys and telemetry aligned so cards, scoreboard, tables, and standings stay coherent."
-          />
-          <div className="grid gap-6 md:grid-cols-2">
-            <ul className="space-y-3 rounded-2xl border border-border/60 bg-background/40 p-6 text-sm text-muted-foreground">
-              <li className="font-mono-accent text-[10px] uppercase tracking-wider text-primary">
-                Core match fields
-              </li>
-              <li>
-                <span className="text-foreground">id</span> — opaque match id for{" "}
-                <code className="font-mono text-xs">/esports/$matchId</code>.
-              </li>
-              <li>
-                <span className="text-foreground">game</span> — enum (
-                <span className="text-foreground">EsportsGame</span>) for filters + label.
-              </li>
-              <li>
-                <span className="text-foreground">tournament</span> — human-readable series name in
-                the eyebrow row.
-              </li>
-              <li>
-                <span className="text-foreground">status</span> —{" "}
-                <span className="text-foreground">live</span> |{" "}
-                <span className="text-foreground">upcoming</span> |{" "}
-                <span className="text-foreground">finished</span>.
-              </li>
-              <li>
-                <span className="text-foreground">startsAt</span> — ISO; drives countdown +
-                ordering.
-              </li>
-              <li>
-                <span className="text-foreground">teamAId · teamBId</span> — must resolve via teams
-                lookup for crests.
-              </li>
-              <li>
-                <span className="text-foreground">scoreA · scoreB</span> — maps won or game points
-                depending on format.
-              </li>
-              <li>
-                <span className="text-foreground">format</span> — short label like{" "}
-                <span className="italic">BO3</span>.
-              </li>
-              <li>
-                <span className="text-foreground">currentMap</span> — optional live ticker string.
-              </li>
-              <li>
-                <span className="text-foreground">viewers</span> — optional integer for live
-                concurrency.
-              </li>
+      <section className="space-y-6">
+        <RefSectionHeading
+          id="schema"
+          index="05"
+          eyebrow="Schema"
+          title="Match model & sample payload"
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <CodeBlock language="typescript" filename="src/data/esports.ts" code={sampleType} />
+          <CodeBlock language="json" filename="GET /api/matches/:id" code={sampleJson} />
+        </div>
+
+        <FieldTable title="Match fields">
+          <FieldRow name="id" type="string" required desc="Opaque match id; powers /esports/$matchId." />
+          <FieldRow name="game" type="EsportsGame" required desc="Enum: Valorant | CS2 | League of Legends | Dota 2." />
+          <FieldRow name="tournament" type="string" required desc="Series + stage label, e.g. 'Champions · Upper Final'." />
+          <FieldRow name="status" type="'live' | 'upcoming' | 'finished'" required desc="Drives badge color and card variant." />
+          <FieldRow name="startsAt" type="string (ISO)" required desc="ISO 8601; powers countdown + ordering." />
+          <FieldRow name="teamAId" type="string" required desc="FK → Team.id (left side)." />
+          <FieldRow name="teamBId" type="string" required desc="FK → Team.id (right side)." />
+          <FieldRow name="scoreA" type="number" required desc="Maps won or game points." />
+          <FieldRow name="scoreB" type="number" required desc="Same as scoreA." />
+          <FieldRow name="format" type="string" required desc="Short label, 'BO3' / 'BO5'." />
+          <FieldRow name="currentMap" type="string?" desc="Live ticker string; live status only." />
+          <FieldRow name="viewers" type="number?" desc="Live concurrency count." />
+        </FieldTable>
+      </section>
+
+      <section className="space-y-6">
+        <RefSectionHeading
+          id="mapping"
+          index="06"
+          eyebrow="Backend"
+          title="Cross-model alignment"
+          description="Match references Team and Player by id — keep these consistent across endpoints."
+        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-border/60 bg-background/40 p-6 text-sm text-muted-foreground">
+            <p className="font-display text-base font-semibold text-foreground">Team contract</p>
+            <ul className="mt-3 space-y-2">
+              <li><code className="text-foreground">tag</code> — 2–3 char monogram, drives crests.</li>
+              <li><code className="text-foreground">logoColor</code> — hex for crest fill.</li>
+              <li><code className="text-foreground">formStreak</code> — last 5 results, ('W'|'L')[].</li>
+              <li><code className="text-foreground">wins · losses · points</code> — standings columns.</li>
+              <li><code className="text-foreground">region · game</code> — partition for filters.</li>
             </ul>
-            <div className="space-y-4 rounded-2xl border border-dashed border-border/80 bg-surface/30 p-6 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Team sheet alignment</p>
-              <p>
-                <span className="text-foreground">Team</span> rows power standings tables:{" "}
-                <span className="text-foreground">tag</span> for monograms,{" "}
-                <span className="text-foreground">logoColor</span> for CSS fills, and{" "}
-                <span className="text-foreground">formStreak</span> for the last five results.
-              </p>
-              <p>
-                <span className="text-foreground">Player</span> stats reuse{" "}
-                <span className="text-foreground">teamId</span> +{" "}
-                <span className="text-foreground">game</span> to stay consistent with match
-                metadata.
+          </div>
+          <div className="rounded-2xl border border-dashed border-border/80 bg-surface/30 p-6 text-sm text-muted-foreground">
+            <p className="font-display text-base font-semibold text-foreground">Player contract</p>
+            <ul className="mt-3 space-y-2">
+              <li><code className="text-foreground">teamId</code> — FK → Team.id; required.</li>
+              <li><code className="text-foreground">game</code> — must match team.game.</li>
+              <li><code className="text-foreground">role</code> — game-specific string.</li>
+              <li><code className="text-foreground">rating · kda</code> — numeric, decimal places preserved.</li>
+              <li><code className="text-foreground">signature</code> — agent / champion / hero name.</li>
+            </ul>
+            <div className="mt-5 rounded-xl border border-primary/30 bg-primary/10 p-4 text-foreground/90">
+              <p className="font-mono-accent text-[10px] uppercase tracking-[0.22em] text-primary">Tip</p>
+              <p className="mt-1.5">
+                When <code>status === "live"</code>, also return <code>currentMap</code> and{" "}
+                <code>viewers</code> — the UI hides the badge if either is missing.
               </p>
             </div>
           </div>
-        </section>
-      </main>
-    </div>
-  );
-}
-
-function SectionEyebrow({ icon, label }: { icon?: React.ReactNode; label: string }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 font-mono-accent text-[11px] uppercase tracking-[0.32em] text-primary">
-        <span className="h-px w-8 bg-primary" />
-        {icon}
-        Section
-      </div>
-      <h2 className="font-display text-xl md:text-2xl font-bold leading-none tracking-tight">
-        {label}
-      </h2>
-      <span className="h-[2px] w-16 bg-gradient-to-r from-primary via-accent to-transparent" />
-    </div>
+        </div>
+      </section>
+    </ReferenceShell>
   );
 }
 
@@ -456,8 +447,8 @@ function TeamBadge({
   return (
     <div className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
       <div
-        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl font-display text-sm font-bold text-background"
-        style={{ background: team.logoColor }}
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl font-display text-sm font-bold text-background shadow-lg"
+        style={{ background: team.logoColor, boxShadow: `0 6px 24px -8px ${team.logoColor}` }}
       >
         {team.tag}
       </div>
