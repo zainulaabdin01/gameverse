@@ -82,7 +82,7 @@ IGN, Kotaku, Dot Esports, PC Gamer, Eurogamer, Polygon, GameSpot.
 
 ---
 
-## Phase 4 — News Server Functions & Frontend Integration (NEXT)
+## Phase 4 — News Server Functions & Frontend Integration ✅
 
 *Goal: Wire up the News routes so they display live data immediately.*
 
@@ -101,7 +101,7 @@ IGN, Kotaku, Dot Esports, PC Gamer, Eurogamer, Polygon, GameSpot.
 
 ---
 
-## Phase 5 — Games Ingestion Pipeline (RAWG)
+## Phase 5 — Games Ingestion Pipeline (RAWG) (NEXT)
 
 ### Steps
 
