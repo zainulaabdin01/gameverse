@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, TrendingUp, Clock, Sparkles, ArrowUpRight } from "lucide-react";
-import { ArticleCard } from "@/components/ArticleCard";
+import { ArticleCard, categoryColors } from "@/components/ArticleCard";
 import { articles as mockArticles, categories, sources, type NewsCategory, type NewsSource } from "@/data/news";
 import { timeAgo } from "@/lib/format";
 import { useMounted } from "@/hooks/use-mounted";
@@ -181,7 +181,12 @@ function NewsHub() {
               All categories
             </Chip>
             {categories.map((c) => (
-              <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
+              <Chip 
+                key={c} 
+                active={category === c} 
+                onClick={() => setCategory(c)}
+                colorClass={categoryColors[c]}
+              >
                 {c}
               </Chip>
             ))}
@@ -292,10 +297,12 @@ function Chip({
   children,
   active,
   onClick,
+  colorClass,
 }: {
   children: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
+  colorClass?: string;
 }) {
   return (
     <button
@@ -304,8 +311,12 @@ function Chip({
       className={cn(
         "whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
         active
-          ? "border-primary/60 bg-primary/15 text-primary shadow-glow"
-          : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+          ? colorClass 
+            ? cn(colorClass, "ring-2 ring-white/10 shadow-glow")
+            : "border-primary/60 bg-primary/15 text-primary shadow-glow"
+          : colorClass
+            ? cn(colorClass, "opacity-50 hover:opacity-100 bg-transparent")
+            : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
     >
       {children}

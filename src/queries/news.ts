@@ -60,7 +60,7 @@ export const getNewsHomepageFn = createServerFn({ method: "GET" }).handler(async
 });
 
 /**
- * Fetch up to 3 related articles by category, excluding the current one.
+ * Fetch up to 5 related articles by category, excluding the current one.
  */
 export const getRelatedArticlesFn = createServerFn({ method: "GET" })
   .inputValidator((data: { category: string; excludeSlug: string }) => data)
@@ -68,7 +68,7 @@ export const getRelatedArticlesFn = createServerFn({ method: "GET" })
     const db = await getDB();
     const result = await db
       .prepare(
-        "SELECT * FROM articles WHERE category = ? AND slug != ? ORDER BY published_at DESC LIMIT 3"
+        "SELECT * FROM articles WHERE category = ? AND slug != ? ORDER BY published_at DESC LIMIT 5"
       )
       .bind(data.category, data.excludeSlug)
       .all<ArticleRow>();

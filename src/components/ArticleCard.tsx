@@ -14,7 +14,7 @@ interface Props {
   linkFieldReference?: boolean;
 }
 
-const sourceColors: Record<string, string> = {
+export const sourceColors: Record<string, string> = {
   IGN: "bg-red-500/30 text-red-200 border-red-500/50",
   Kotaku: "bg-emerald-500/30 text-emerald-200 border-emerald-500/50",
   "Dot Esports": "bg-amber-500/30 text-amber-200 border-amber-500/50",
@@ -24,7 +24,7 @@ const sourceColors: Record<string, string> = {
   GameSpot: "bg-orange-500/30 text-orange-200 border-orange-500/50",
 };
 
-const categoryColors: Record<string, string> = {
+export const categoryColors: Record<string, string> = {
   Esports: "text-blue-200 bg-blue-500/30 border-blue-500/50",
   Reviews: "text-purple-200 bg-purple-500/30 border-purple-500/50",
   Industry: "text-slate-200 bg-slate-500/30 border-slate-500/50",
@@ -117,11 +117,17 @@ function FeaturedBody({ article, ago }: { article: Article; ago: string }) {
   return (
     <>
       <div className="relative aspect-[16/9] overflow-hidden md:aspect-[21/9]">
+        {/* Blurred backdrop */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center blur-xl opacity-60 scale-110 transition-transform duration-700 group-hover:scale-125"
+          style={{ backgroundImage: `url(${article.cover})` }}
+        />
+        {/* Foreground contained image */}
         <img
           src={article.cover}
           alt={article.title}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="relative h-full w-full object-contain transition-transform duration-700 group-hover:scale-105 drop-shadow-2xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
       </div>
@@ -178,11 +184,17 @@ function DefaultBody({ article, ago }: { article: Article; ago: string }) {
   return (
     <>
       <div className="relative aspect-[16/9] overflow-hidden">
+        {/* Blurred backdrop */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center blur-md opacity-50 scale-110 transition-transform duration-500 group-hover:scale-125"
+          style={{ backgroundImage: `url(${article.cover})` }}
+        />
+        {/* Foreground contained image */}
         <img
           src={article.cover}
           alt={article.title}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="relative h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-md"
         />
         <span
           className={cn(
