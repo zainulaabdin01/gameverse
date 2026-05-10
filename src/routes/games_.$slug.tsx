@@ -5,7 +5,7 @@ import { articlesByGame } from "@/data/news";
 import { ArticleCard } from "@/components/ArticleCard";
 import { GameCard } from "@/components/GameCard";
 
-export const Route = createFileRoute("/games/$slug")({
+export const Route = createFileRoute("/games_/$slug")({
   loader: ({ params }) => {
     const game = getGame(params.slug);
     if (!game) throw notFound();

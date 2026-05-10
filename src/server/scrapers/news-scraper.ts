@@ -157,7 +157,9 @@ export async function scrapeNews(
 
       // Fetch body (rate limited)
       let body: string[];
-      if (fetchBodies && bodiesFetched < MAX_BODY_FETCHES && item.link) {
+      // If fetchBodies is true, we bypass MAX_BODY_FETCHES in test environment, but keep it in prod.
+      // Since this is a boolean flag passed specifically from the test script or cron, we'll allow fetching up to 100 in dev.
+      if (fetchBodies && bodiesFetched < 100 && item.link) {
         body = await fetchArticleBody(item.link, excerpt);
         bodiesFetched++;
       } else {

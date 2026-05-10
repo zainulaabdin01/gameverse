@@ -1,15 +1,20 @@
 import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { ArticleCard } from "@/components/ArticleCard";
-import { articles, getArticle } from "@/data/news";
 import { getGame } from "@/data/games";
 import { timeAgo } from "@/lib/format";
+import { getArticleBySlugFn, getRelatedArticlesFn } from "@/queries/news";
 
-export const Route = createFileRoute("/news/$slug")({
-  loader: ({ params }) => {
-    const article = getArticle(params.slug);
+export const Route = createFileRoute("/news_/$slug")({
+  loader: async ({ params }) => {
+    const article = await getArticleBySlugFn({ data: params.slug });
     if (!article) throw notFound();
-    return { article };
+    
+    const related = await getRelatedArticlesFn({ 
+      data: { category: article.category, excludeSlug: article.slug } 
+    });
+    
+    return { article, related };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -55,10 +60,7 @@ function ErrorView({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function ArticlePage() {
-  const { article } = Route.useLoaderData();
-  const related = articles
-    .filter((a) => a.slug !== article.slug && a.category === article.category)
-    .slice(0, 3);
+  const { article, related } = Route.useLoaderData();
   const game = article.relatedGameSlug ? getGame(article.relatedGameSlug) : undefined;
 
   return (

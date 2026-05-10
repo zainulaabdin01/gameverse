@@ -15,13 +15,22 @@ interface Props {
 }
 
 const sourceColors: Record<string, string> = {
-  IGN: "bg-red-500/15 text-red-300 border-red-500/30",
-  Kotaku: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  "Dot Esports": "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  "PC Gamer": "bg-sky-500/15 text-sky-300 border-sky-500/30",
-  Eurogamer: "bg-violet-500/15 text-violet-300 border-violet-500/30",
-  Polygon: "bg-pink-500/15 text-pink-300 border-pink-500/30",
-  GameSpot: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+  IGN: "bg-red-500/30 text-red-200 border-red-500/50",
+  Kotaku: "bg-emerald-500/30 text-emerald-200 border-emerald-500/50",
+  "Dot Esports": "bg-amber-500/30 text-amber-200 border-amber-500/50",
+  "PC Gamer": "bg-sky-500/30 text-sky-200 border-sky-500/50",
+  Eurogamer: "bg-violet-500/30 text-violet-200 border-violet-500/50",
+  Polygon: "bg-pink-500/30 text-pink-200 border-pink-500/50",
+  GameSpot: "bg-orange-500/30 text-orange-200 border-orange-500/50",
+};
+
+const categoryColors: Record<string, string> = {
+  Esports: "text-blue-200 bg-blue-500/30 border-blue-500/50",
+  Reviews: "text-purple-200 bg-purple-500/30 border-purple-500/50",
+  Industry: "text-slate-200 bg-slate-500/30 border-slate-500/50",
+  Updates: "text-teal-200 bg-teal-500/30 border-teal-500/50",
+  Drama: "text-rose-200 bg-rose-500/30 border-rose-500/50",
+  Hardware: "text-zinc-200 bg-zinc-500/30 border-zinc-500/50",
 };
 
 export function ArticleCard({
@@ -126,7 +135,12 @@ function FeaturedBody({ article, ago }: { article: Article; ago: string }) {
           >
             {article.source}
           </span>
-          <span className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">
+          <span
+            className={cn(
+              "rounded-md border px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider",
+              categoryColors[article.category] || "bg-surface-3/80 text-muted-foreground"
+            )}
+          >
             {article.category}
           </span>
           <span className="text-xs text-muted-foreground">{ago}</span>
@@ -181,7 +195,9 @@ function DefaultBody({ article, ago }: { article: Article; ago: string }) {
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-center gap-2 text-[10px] font-mono-accent uppercase text-muted-foreground">
-          <span>{article.category}</span>
+          <span className={cn("rounded-sm border px-1.5 py-0.5", categoryColors[article.category] || "text-muted-foreground")}>
+            {article.category}
+          </span>
           <span>·</span>
           <span>{ago}</span>
         </div>

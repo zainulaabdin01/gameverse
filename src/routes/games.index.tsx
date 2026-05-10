@@ -24,7 +24,7 @@ const PLATFORMS: Platform[] = ["PC", "PS5", "Xbox", "Switch"];
 
 type Sort = "popularity" | "rating" | "release" | "az";
 
-export const Route = createFileRoute("/games")({
+export const Route = createFileRoute("/games/")({
   head: () => ({
     meta: [
       { title: "Game Directory — Gameverse" },

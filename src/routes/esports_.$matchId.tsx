@@ -5,7 +5,7 @@ import { MatchCard } from "@/components/MatchCard";
 import { formatViewers, timeUntil } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/esports/$matchId")({
+export const Route = createFileRoute("/esports_/$matchId")({
   loader: ({ params }) => {
     const match = getMatch(params.matchId);
     if (!match) throw notFound();

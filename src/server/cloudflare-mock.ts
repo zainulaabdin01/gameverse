@@ -1,8 +1,4 @@
-/**
- * Test script for news scraper. Run with: npx tsx src/server/scrapers/test-local.ts
- */
 import Database from "better-sqlite3";
-import { scrapeNews } from "./news-scraper";
 import { join } from "path";
 
 // Locate the local D1 database file
@@ -13,17 +9,17 @@ const dbPath = join(
 
 const sqliteDb = new Database(dbPath);
 
-// Create a minimal D1Database mock
 const mockD1 = {
   prepare: (query: string) => {
-    // Replace ? with standard sqlite bindings in basic ways if needed,
-    // but better-sqlite3 handles ? natively.
     return {
       bind: (...args: any[]) => {
         return {
           all: async () => {
             const results = sqliteDb.prepare(query).all(...args);
             return { results, success: true, meta: { duration: 0 } };
+          },
+          first: async () => {
+            return sqliteDb.prepare(query).get(...args) || null;
           },
           run: async () => {
             const info = sqliteDb.prepare(query).run(...args);
@@ -39,6 +35,9 @@ const mockD1 = {
         const results = sqliteDb.prepare(query).all();
         return { results, success: true, meta: { duration: 0 } };
       },
+      first: async () => {
+        return sqliteDb.prepare(query).get() || null;
+      },
       run: async () => {
         const info = sqliteDb.prepare(query).run();
         return {
@@ -49,20 +48,9 @@ const mockD1 = {
       },
     };
   },
-} as any as D1Database;
+} as any;
 
-async function run() {
-  console.log("Cleaning up existing articles...");
-  await mockD1.prepare("DELETE FROM articles").run();
-
-  console.log("Running scraper with full bodies...");
-  // Pass fetchBodies=true to get actual full articles
-  const result = await scrapeNews(mockD1, true);
-  console.log("Scrape complete:", result);
-
-  // Check the table size
-  const count = sqliteDb.prepare("SELECT COUNT(*) as c FROM articles").get() as any;
-  console.log("Total articles in DB now:", count.c);
-}
-
-run().catch(console.error);
+export const env = {
+  DB: mockD1,
+  CACHE: {} as any,
+};

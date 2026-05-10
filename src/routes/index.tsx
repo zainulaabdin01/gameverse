@@ -4,12 +4,13 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { GameCard } from "@/components/GameCard";
 import { MatchCard } from "@/components/MatchCard";
 import { SectionHeader } from "@/components/SectionHeader";
-import { articles, featuredArticles } from "@/data/news";
 import { featuredGames, trendingGames } from "@/data/games";
 import { liveMatches, upcomingMatches } from "@/data/esports";
 import ctaVideo from "@/assets/cta-bg.mp4.asset.json";
+import { getNewsHomepageFn } from "@/queries/news";
 
 export const Route = createFileRoute("/")({
+  loader: () => getNewsHomepageFn(),
   head: () => ({
     meta: [
       { title: "Gameverse — One place for everything gaming" },
@@ -24,12 +25,10 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const heroes = featuredArticles();
+  const { trending, featured: heroes, topStories } = Route.useLoaderData();
   const lead = heroes[0];
   const live = liveMatches();
   const upcoming = upcomingMatches().slice(0, 3);
-  const topStories = articles.filter((a) => !a.featured).slice(0, 6);
-  const trending = articles.slice(0, 5);
   const games = featuredGames();
   const hot = trendingGames();
 

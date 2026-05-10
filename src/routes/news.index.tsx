@@ -2,12 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, TrendingUp, Clock, Sparkles, ArrowUpRight } from "lucide-react";
 import { ArticleCard } from "@/components/ArticleCard";
-import { articles, categories, sources, type NewsCategory, type NewsSource } from "@/data/news";
+import { articles as mockArticles, categories, sources, type NewsCategory, type NewsSource } from "@/data/news";
 import { timeAgo } from "@/lib/format";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
+import { listArticlesFn } from "@/queries/news";
 
-export const Route = createFileRoute("/news")({
+export const Route = createFileRoute("/news/")({
+  loader: () => listArticlesFn(),
   head: () => ({
     meta: [
       { title: "News Hub — Gameverse" },
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/news")({
 });
 
 function NewsHub() {
+  const articles = Route.useLoaderData();
   const mounted = useMounted();
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<NewsSource | "all">("all");
@@ -34,7 +37,7 @@ function NewsHub() {
 
   const sorted = useMemo(
     () => [...articles].sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)),
-    [],
+    [articles],
   );
 
   const filtered = useMemo(() => {
@@ -56,7 +59,7 @@ function NewsHub() {
 
   const mostRead = useMemo(
     () => [...articles].sort((a, b) => (b.reads ?? 0) - (a.reads ?? 0)).slice(0, 5),
-    [],
+    [articles],
   );
 
   const todayCount = sorted.filter(
@@ -197,22 +200,10 @@ function NewsHub() {
           {/* Editorial above-the-fold */}
           <section className="mx-auto max-w-[1400px] px-4 py-12 md:px-8 md:py-16">
             <SectionEyebrow icon={<Sparkles className="h-3.5 w-3.5" />} label="The Front Page" />
-            <div className="mt-6 grid gap-6 lg:grid-cols-12">
-              {lead && (
-                <div className="lg:col-span-8">
-                  <ArticleCard
-                    article={lead}
-                    variant="featured"
-                    className="h-full"
-                    linkFieldReference
-                  />
-                </div>
-              )}
-              <aside className="flex flex-col gap-6 lg:col-span-4">
-                {subFeatured.map((a) => (
-                  <ArticleCard key={a.slug} article={a} className="h-full" />
-                ))}
-              </aside>
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[lead, ...subFeatured].filter(Boolean).map((a) => (
+                <ArticleCard key={a.slug} article={a} />
+              ))}
             </div>
           </section>
 

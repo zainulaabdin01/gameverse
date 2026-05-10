@@ -14,7 +14,7 @@ import {
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/esports")({
+export const Route = createFileRoute("/esports/")({
   head: () => ({
     meta: [
       { title: "Esports Stats — Gameverse" },
