@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Match } from "@/data/esports";
-import { getTeam } from "@/data/esports";
+import { getTeam, gameColors } from "@/data/esports";
 import { formatViewers, timeUntil } from "@/lib/format";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
@@ -22,14 +22,19 @@ export function MatchCard({ match, className, asStatic, linkFieldReference }: Pr
   const winner = isFinished ? (match.scoreA > match.scoreB ? "a" : "b") : null;
   const mounted = useMounted();
 
-  const shell =
-    "group flex flex-col gap-3 rounded-xl border border-border/60 bg-surface p-4 hover-lift transition-colors hover:border-primary/40";
+  const shell = cn(
+    "group flex flex-col gap-3 rounded-xl border p-4 hover-lift transition-colors hover:border-primary/40",
+    gameColors[match.game]
+  );
 
   const inner = (
     <>
       <div className="flex items-center justify-between">
-        <span className="font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
-          {match.game} · {match.tournament}
+        <span className="font-mono-accent text-[10px] uppercase tracking-wider">
+          <span className="text-current">
+            {match.game}
+          </span>
+          <span className="text-muted-foreground"> · {match.tournament}</span>
         </span>
         {isLive && (
           <span className="flex items-center gap-1.5 rounded-full bg-[oklch(var(--live)/0.15)] px-2 py-0.5 text-[10px] font-mono-accent uppercase text-[oklch(var(--live))]">

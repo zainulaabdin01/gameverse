@@ -9,6 +9,7 @@ import {
   finishedMatches,
   teamsByGame,
   playersByGame,
+  gameColors,
   type EsportsGame,
 } from "@/data/esports";
 import { useMounted } from "@/hooks/use-mounted";
@@ -111,7 +112,7 @@ function EsportsPage() {
               All games
             </Chip>
             {esportsGames.map((g) => (
-              <Chip key={g} active={filter === g} onClick={() => setFilter(g)}>
+              <Chip key={g} active={filter === g} onClick={() => setFilter(g)} colorClass={gameColors[g]}>
                 {g}
               </Chip>
             ))}
@@ -210,10 +211,12 @@ function Chip({
   children,
   active,
   onClick,
+  colorClass,
 }: {
   children: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
+  colorClass?: string;
 }) {
   return (
     <button
@@ -222,8 +225,12 @@ function Chip({
       className={cn(
         "whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
         active
-          ? "border-primary/60 bg-primary/15 text-primary shadow-glow"
-          : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+          ? colorClass
+            ? `${colorClass} shadow-glow`
+            : "border-primary/60 bg-primary/15 text-primary shadow-glow"
+          : colorClass
+            ? "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
     >
       {children}

@@ -121,3 +121,11 @@ export const upcomingMatches = () => matches.filter((m) => m.status === "upcomin
 export const finishedMatches = () => matches.filter((m) => m.status === "finished");
 
 export const esportsGames: EsportsGame[] = ["Valorant", "CS2", "League of Legends", "Dota 2"];
+
+// Game-specific color classes matching the news page approach
+export const gameColors: Record<EsportsGame, string> = {
+  "Valorant": "text-red-200 bg-red-500/10 border-red-500/30",
+  "CS2": "text-blue-200 bg-blue-500/10 border-blue-500/30",
+  "League of Legends": "text-green-200 bg-green-500/10 border-green-500/30",
+  "Dota 2": "text-orange-200 bg-orange-500/10 border-orange-500/30",
+};

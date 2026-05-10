@@ -26,5 +26,10 @@
       "0 2 * * *",
       "0 */12 * * *"
     ]
+  },
+
+  "vars": {
+    "RAWG_API_KEY": "your-rawg-api-key-here",
+    "PANDASCORE_API_KEY": "your-pandascore-api-key-here"
   }
 }

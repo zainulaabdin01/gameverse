@@ -8,6 +8,7 @@
  */
 import { scrapeNews } from "./news-scraper";
 import { scrapeGames } from "./games-scraper";
+import { scrapeEsports } from "./esports-scraper";
 
 /**
  * Handle a scheduled cron event.
@@ -30,8 +31,7 @@ export async function handleScheduled(
       break;
 
     case "0 */12 * * *":
-      // Phase 7: await scrapeEsports(env.DB, env.PANDASCORE_API_KEY);
-      console.log("[cron] Esports scraper not yet implemented");
+      await scrapeEsports(env.DB, env.PANDASCORE_API_KEY);
       break;
 
     default:

@@ -53,4 +53,6 @@ const mockD1 = {
 export const env = {
   DB: mockD1,
   CACHE: {} as any,
+  RAWG_API_KEY: process.env.RAWG_API_KEY || "test-rawg-key",
+  PANDASCORE_API_KEY: process.env.PANDASCORE_API_KEY || "test-pandascore-key",
 };

@@ -11,8 +11,5 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["cloudflare:workers"],
     },
-    ssr: {
-      external: ["cloudflare:workers"],
-    },
   },
 });
