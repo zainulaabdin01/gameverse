@@ -76,3 +76,21 @@ export const getRelatedArticlesFn = createServerFn({ method: "GET" })
     if (!result.results) return [];
     return result.results.map(articleRowToArticle);
   });
+
+/**
+ * Fetch up to 5 articles related to a specific game.
+ */
+export const getArticlesByGameFn = createServerFn({ method: "GET" })
+  .inputValidator((data: string) => data)
+  .handler(async ({ data }) => {
+    const db = await getDB();
+    const result = await db
+      .prepare(
+        "SELECT * FROM articles WHERE related_game_slug = ? ORDER BY published_at DESC LIMIT 5"
+      )
+      .bind(data)
+      .all<ArticleRow>();
+
+    if (!result.results) return [];
+    return result.results.map(articleRowToArticle);
+  });

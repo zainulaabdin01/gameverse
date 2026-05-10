@@ -101,7 +101,7 @@ IGN, Kotaku, Dot Esports, PC Gamer, Eurogamer, Polygon, GameSpot.
 
 ---
 
-## Phase 5 — Games Ingestion Pipeline (RAWG) (NEXT)
+## Phase 5 — Games Ingestion Pipeline (RAWG) ✅
 
 ### Steps
 
@@ -115,20 +115,20 @@ IGN, Kotaku, Dot Esports, PC Gamer, Eurogamer, Polygon, GameSpot.
 
 ---
 
-## Phase 6 — Games Server Functions & Frontend Integration
+## Phase 6 — Games Server Functions & Frontend Integration ✅
 
 *Goal: Wire up the Games routes.*
 
 ### Steps
 
-1. **Build Queries:** Create `src/server/queries/games.ts` with `getGameBySlug` and `listGames`.
-2. **Detail Route:** Update `src/routes/games.$slug.tsx` loader to call `getGameBySlug`.
-3. **List Route:** Update `src/routes/games.tsx` loader to call `listGames`.
-4. **Home Page (Partial):** Update `src/routes/index.tsx` to load games from DB.
+1. **Build Queries:** Create `src/queries/games.ts` with `getGameBySlug`, `listGames`, `getGamesHomepageFn` and `getSimilarGamesFn`.
+2. **Detail Route:** Update `src/routes/games_.$slug.tsx` loader to call `getGameBySlugFn`.
+3. **List Route:** Update `src/routes/games.index.tsx` loader to call `listGamesFn` with URL search param filtering.
+4. **Home Page (Partial):** Update `src/routes/index.tsx` to load games from DB concurrently with news.
 
 ---
 
-## Phase 7 — Esports Ingestion Pipeline (PandaScore)
+## Phase 7 — Esports Ingestion Pipeline (PandaScore) (NEXT)
 
 ### Steps
 

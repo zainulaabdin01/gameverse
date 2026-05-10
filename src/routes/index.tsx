@@ -4,13 +4,17 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { GameCard } from "@/components/GameCard";
 import { MatchCard } from "@/components/MatchCard";
 import { SectionHeader } from "@/components/SectionHeader";
-import { featuredGames, trendingGames } from "@/data/games";
+import { type Game } from "@/data/games";
 import { liveMatches, upcomingMatches } from "@/data/esports";
 import ctaVideo from "@/assets/cta-bg.mp4.asset.json";
 import { getNewsHomepageFn } from "@/queries/news";
+import { getGamesHomepageFn } from "@/queries/games";
 
 export const Route = createFileRoute("/")({
-  loader: () => getNewsHomepageFn(),
+  loader: async () => {
+    const [news, games] = await Promise.all([getNewsHomepageFn(), getGamesHomepageFn()]);
+    return { news, games };
+  },
   head: () => ({
     meta: [
       { title: "Gameverse — One place for everything gaming" },
@@ -25,12 +29,13 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { trending, featured: heroes, topStories } = Route.useLoaderData();
+  const { news, games: gamesData } = Route.useLoaderData();
+  const { trending, featured: heroes, topStories } = news;
   const lead = heroes[0];
   const live = liveMatches();
   const upcoming = upcomingMatches().slice(0, 3);
-  const games = featuredGames();
-  const hot = trendingGames();
+  const games = gamesData.featured;
+  const hot = gamesData.trending;
 
   return (
     <>
@@ -345,7 +350,7 @@ function HomePage() {
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 
-function GameCardWide({ game }: { game: ReturnType<typeof featuredGames>[number] }) {
+function GameCardWide({ game }: { game: Game }) {
   return (
     <Link
       to="/games/$slug"

@@ -3,10 +3,11 @@
  *
  * Wired to Cloudflare Cron Triggers defined in wrangler.jsonc:
  *   Every 30 min  → News RSS scraper
- *   Daily at 2am  → Games scraper (Phase 4)
- *   Every 12 hrs  → Esports scraper (Phase 5)
+ *   Daily at 2am  → Games scraper (RAWG)
+ *   Every 12 hrs  → Esports scraper (Phase 7)
  */
 import { scrapeNews } from "./news-scraper";
+import { scrapeGames } from "./games-scraper";
 
 /**
  * Handle a scheduled cron event.
@@ -25,12 +26,11 @@ export async function handleScheduled(
       break;
 
     case "0 2 * * *":
-      // Phase 4: await scrapeGames(env.DB);
-      console.log("[cron] Games scraper not yet implemented");
+      await scrapeGames(env.DB, env.RAWG_API_KEY);
       break;
 
     case "0 */12 * * *":
-      // Phase 5: await scrapeEsports(env.DB);
+      // Phase 7: await scrapeEsports(env.DB, env.PANDASCORE_API_KEY);
       console.log("[cron] Esports scraper not yet implemented");
       break;
 

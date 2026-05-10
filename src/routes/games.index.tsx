@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search, Library } from "lucide-react";
-import { GameCard } from "@/components/GameCard";
-import { games, type Genre, type Platform } from "@/data/games";
+import { GameCard, genreColors } from "@/components/GameCard";
+import { type Genre, type Platform } from "@/data/games";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
+import { listGamesFn, type SortOrder } from "@/queries/games";
 
 const GENRES: Genre[] = [
   "Action",
@@ -22,9 +22,28 @@ const GENRES: Genre[] = [
 ];
 const PLATFORMS: Platform[] = ["PC", "PS5", "Xbox", "Switch"];
 
-type Sort = "popularity" | "rating" | "release" | "az";
+type GameSearch = {
+  q?: string;
+  genre?: string;
+  platform?: string;
+  minRating?: number;
+  sort?: SortOrder;
+};
 
 export const Route = createFileRoute("/games/")({
+  validateSearch: (search: Record<string, unknown>): GameSearch => {
+    return {
+      q: search.q as string | undefined,
+      genre: search.genre as string | undefined,
+      platform: search.platform as string | undefined,
+      minRating: search.minRating ? Number(search.minRating) : undefined,
+      sort: search.sort as SortOrder | undefined,
+    };
+  },
+  loaderDeps: ({ search }) => search,
+  loader: async ({ deps }) => {
+    return listGamesFn({ data: deps });
+  },
   head: () => ({
     meta: [
       { title: "Game Directory — Gameverse" },
@@ -45,38 +64,35 @@ export const Route = createFileRoute("/games/")({
 
 function GameDirectory() {
   const mounted = useMounted();
-  const [query, setQuery] = useState("");
-  const [genre, setGenre] = useState<Genre | "all">("all");
-  const [platform, setPlatform] = useState<Platform | "all">("all");
-  const [minRating, setMinRating] = useState(0);
-  const [sort, setSort] = useState<Sort>("popularity");
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const results = Route.useLoaderData();
 
-  const results = useMemo(() => {
-    const filtered = games
-      .filter((g) =>
-        query.trim() === "" ? true : g.title.toLowerCase().includes(query.toLowerCase()),
-      )
-      .filter((g) => (genre === "all" ? true : g.genres.includes(genre)))
-      .filter((g) => (platform === "all" ? true : g.platforms.includes(platform)))
-      .filter((g) => g.rating >= minRating);
+  const query = search.q ?? "";
+  const genre = search.genre ?? "all";
+  const platform = search.platform ?? "all";
+  const minRating = search.minRating ?? 0;
+  const sort = search.sort ?? "popularity";
 
-    switch (sort) {
-      case "rating":
-        return filtered.sort((a, b) => b.rating - a.rating);
-      case "release":
-        return filtered.sort((a, b) => b.releaseYear - a.releaseYear);
-      case "az":
-        return filtered.sort((a, b) => a.title.localeCompare(b.title));
-      default:
-        return filtered.sort(
-          (a, b) => Number(!!b.trending) - Number(!!a.trending) || b.userScore - a.userScore,
-        );
-    }
-  }, [query, genre, platform, minRating, sort]);
+  const updateSearch = (updates: Partial<GameSearch>) => {
+    navigate({
+      search: (prev) => {
+        const next = { ...prev, ...updates };
+        // Clean up defaults to keep URL clean
+        if (next.q === "") delete next.q;
+        if (next.genre === "all") delete next.genre;
+        if (next.platform === "all") delete next.platform;
+        if (next.minRating === 0) delete next.minRating;
+        if (next.sort === "popularity") delete next.sort;
+        return next;
+      },
+      replace: true,
+    });
+  };
 
   return (
     <div className="relative">
-      {/* Nameplate — same editorial header as News / Esports */}
+      {/* Nameplate */}
       <header className="relative overflow-hidden border-b border-border/60 bg-surface/20">
         <div className="bg-aurora absolute inset-0 opacity-40" />
         <div className="bg-grid absolute inset-0 opacity-[0.12]" />
@@ -95,13 +111,13 @@ function GameDirectory() {
                   })
                 : ""}
             </span>
-            <span className="hidden sm:inline">Catalogue · {games.length} titles</span>
+            <span className="hidden sm:inline">Catalogue</span>
             <span className="flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
               </span>
-              Updated daily
+              Live Database
             </span>
           </div>
 
@@ -125,7 +141,7 @@ function GameDirectory() {
         </div>
       </header>
 
-      {/* Sticky filter bar — matches News */}
+      {/* Sticky filter bar */}
       <div className="sticky top-16 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto max-w-[1400px] px-4 py-3 md:px-8">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -133,7 +149,7 @@ function GameDirectory() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => updateSearch({ q: e.target.value })}
                 placeholder="Search the catalogue…"
                 className="w-full rounded-lg border border-border bg-surface/70 px-9 py-2 text-sm placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
@@ -141,7 +157,7 @@ function GameDirectory() {
             <div className="flex flex-wrap gap-2">
               <select
                 value={platform}
-                onChange={(e) => setPlatform(e.target.value as Platform | "all")}
+                onChange={(e) => updateSearch({ platform: e.target.value })}
                 className="rounded-lg border border-border bg-surface/70 px-3 py-2 text-sm focus:border-primary/60 focus:outline-none"
               >
                 <option value="all">All platforms</option>
@@ -153,7 +169,7 @@ function GameDirectory() {
               </select>
               <select
                 value={minRating}
-                onChange={(e) => setMinRating(Number(e.target.value))}
+                onChange={(e) => updateSearch({ minRating: Number(e.target.value) })}
                 className="rounded-lg border border-border bg-surface/70 px-3 py-2 text-sm focus:border-primary/60 focus:outline-none"
               >
                 <option value={0}>Any rating</option>
@@ -163,7 +179,7 @@ function GameDirectory() {
               </select>
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value as Sort)}
+                onChange={(e) => updateSearch({ sort: e.target.value as SortOrder })}
                 className="rounded-lg border border-border bg-surface/70 px-3 py-2 text-sm focus:border-primary/60 focus:outline-none"
               >
                 <option value="popularity">Sort: Popularity</option>
@@ -174,11 +190,16 @@ function GameDirectory() {
             </div>
           </div>
           <div className="mt-3 -mx-4 flex gap-2 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0">
-            <Chip active={genre === "all"} onClick={() => setGenre("all")}>
+            <Chip active={genre === "all"} onClick={() => updateSearch({ genre: "all" })}>
               All genres
             </Chip>
             {GENRES.map((g) => (
-              <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>
+              <Chip 
+                key={g} 
+                active={genre === g} 
+                onClick={() => updateSearch({ genre: g })}
+                colorClass={genreColors[g]}
+              >
                 {g}
               </Chip>
             ))}
@@ -192,11 +213,7 @@ function GameDirectory() {
           <button
             type="button"
             onClick={() => {
-              setQuery("");
-              setGenre("all");
-              setPlatform("all");
-              setMinRating(0);
-              setSort("popularity");
+              navigate({ search: {}, replace: true });
             }}
             className="text-xs font-medium text-muted-foreground hover:text-primary"
           >
@@ -215,8 +232,8 @@ function GameDirectory() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {results.map((g, i) => (
-              <GameCard key={g.slug} game={g} linkFieldReference={i === 0} />
+            {results.map((g) => (
+              <GameCard key={g.slug} game={g} />
             ))}
           </div>
         )}
@@ -245,10 +262,12 @@ function Chip({
   children,
   active,
   onClick,
+  colorClass,
 }: {
   children: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
+  colorClass?: string;
 }) {
   return (
     <button
@@ -257,8 +276,12 @@ function Chip({
       className={cn(
         "whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
         active
-          ? "border-primary/60 bg-primary/15 text-primary shadow-glow"
-          : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+          ? colorClass 
+            ? cn(colorClass, "ring-2 ring-white/10 shadow-glow")
+            : "border-primary/60 bg-primary/15 text-primary shadow-glow"
+          : colorClass
+            ? cn(colorClass, "opacity-50 hover:opacity-100 bg-transparent")
+            : "border-border bg-surface/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
     >
       {children}

@@ -1,15 +1,23 @@
 import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
 import { ArrowLeft, Star } from "lucide-react";
-import { getGame, games as allGames } from "@/data/games";
-import { articlesByGame } from "@/data/news";
+import { getGameBySlugFn, getSimilarGamesFn } from "@/queries/games";
+import { getArticlesByGameFn } from "@/queries/news";
 import { ArticleCard } from "@/components/ArticleCard";
-import { GameCard } from "@/components/GameCard";
+import { GameCard, genreColors } from "@/components/GameCard";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/games_/$slug")({
-  loader: ({ params }) => {
-    const game = getGame(params.slug);
+  loader: async ({ params }) => {
+    const game = await getGameBySlugFn({ data: params.slug });
     if (!game) throw notFound();
-    return { game };
+
+    // Fetch related data concurrently
+    const [news, similar] = await Promise.all([
+      getArticlesByGameFn({ data: params.slug }),
+      getSimilarGamesFn({ data: { genres: game.genres, excludeSlug: game.slug } }),
+    ]);
+
+    return { game, news, similar };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -29,7 +37,10 @@ export const Route = createFileRoute("/games_/$slug")({
         <h1 className="font-display text-2xl font-bold">Game unavailable</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <button
-          onClick={() => { router.invalidate(); reset(); }}
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
           className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground"
         >
           Try again
@@ -49,11 +60,7 @@ export const Route = createFileRoute("/games_/$slug")({
 });
 
 function GamePage() {
-  const { game } = Route.useLoaderData();
-  const news = articlesByGame(game.slug);
-  const similar = allGames
-    .filter((g) => g.slug !== game.slug && g.genres.some((x) => game.genres.includes(x)))
-    .slice(0, 5);
+  const { game, news, similar } = Route.useLoaderData();
 
   return (
     <div>
@@ -71,7 +78,10 @@ function GamePage() {
             {game.genres.map((g: string) => (
               <span
                 key={g}
-                className="rounded-md bg-surface-3/80 px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground backdrop-blur"
+                className={cn(
+                  "rounded-md border px-2 py-0.5 text-[10px] font-mono-accent uppercase tracking-wider backdrop-blur",
+                  genreColors[g] || "bg-surface-3/80 text-muted-foreground border-transparent"
+                )}
               >
                 {g}
               </span>
@@ -81,11 +91,11 @@ function GamePage() {
             {game.title}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span>{game.developer}</span>
+            <span>{game.developer || "Unknown"}</span>
             <span>·</span>
-            <span>{game.releaseYear}</span>
+            <span>{game.releaseYear || "TBD"}</span>
             <span>·</span>
-            <span>{game.platforms.join(" / ")}</span>
+            <span>{game.platforms.length > 0 ? game.platforms.join(" / ") : "TBD"}</span>
           </div>
         </div>
       </div>
@@ -93,14 +103,14 @@ function GamePage() {
       <section className="mx-auto max-w-[1200px] px-4 py-12 md:px-8">
         <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
           <div>
-            <p className="text-lg leading-relaxed text-foreground/90">
+            <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
               {game.description}
             </p>
 
             {game.screenshots.length > 0 && (
               <div className="mt-8">
                 <h2 className="font-display text-xl font-bold mb-4">Screenshots</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-4">
                   {game.screenshots.map((s: string, i: number) => (
                     <img
                       key={i}
@@ -116,7 +126,7 @@ function GamePage() {
 
             {news.length > 0 && (
               <div className="mt-12">
-                <h2 className="font-display text-xl font-bold mb-4">Recent news</h2>
+                <h2 className="font-display text-xl font-bold mb-4">Related news</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {news.map((a) => (
                     <ArticleCard key={a.slug} article={a} />
@@ -135,9 +145,9 @@ function GamePage() {
                   </div>
                   <div className="mt-1 flex items-baseline gap-1">
                     <span className="font-display text-4xl font-bold gradient-text">
-                      {game.rating}
+                      {game.rating ? (game.rating / 10).toFixed(1) : "-"}
                     </span>
-                    <span className="text-xs text-muted-foreground">/100</span>
+                    <span className="text-xs text-muted-foreground">/10</span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -147,7 +157,7 @@ function GamePage() {
                   <div className="mt-1 flex items-center gap-1">
                     <Star className="h-4 w-4 fill-primary text-primary" />
                     <span className="font-display text-2xl font-bold">
-                      {game.userScore.toFixed(1)}
+                      {game.userScore ? game.userScore.toFixed(1) : "-"}
                     </span>
                   </div>
                 </div>
@@ -155,11 +165,11 @@ function GamePage() {
             </div>
 
             <div className="rounded-xl border border-border/60 bg-surface p-5 space-y-3 text-sm">
-              <Detail label="Developer" value={game.developer} />
-              <Detail label="Publisher" value={game.publisher} />
-              <Detail label="Release" value={String(game.releaseYear)} />
-              <Detail label="Platforms" value={game.platforms.join(", ")} />
-              <Detail label="Genres" value={game.genres.join(", ")} />
+              <Detail label="Developer" value={game.developer || "Unknown"} />
+              <Detail label="Publisher" value={game.publisher || "Unknown"} />
+              <Detail label="Release" value={game.releaseYear ? String(game.releaseYear) : "TBD"} />
+              <Detail label="Platforms" value={game.platforms.length > 0 ? game.platforms.join(", ") : "TBD"} />
+              <Detail label="Genres" value={game.genres.length > 0 ? game.genres.join(", ") : "N/A"} />
             </div>
           </aside>
         </div>
