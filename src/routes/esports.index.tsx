@@ -4,14 +4,14 @@ import { Radio, CalendarClock, Trophy, Sparkles } from "lucide-react";
 import { MatchCard } from "@/components/MatchCard";
 import {
   esportsGames,
-  liveMatches,
-  upcomingMatches,
-  finishedMatches,
-  teamsByGame,
-  playersByGame,
   gameColors,
   type EsportsGame,
 } from "@/data/esports";
+import { 
+  listMatchesFn, 
+  listTeamsFn, 
+  listPlayersFn 
+} from "@/queries/esports";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
@@ -31,24 +31,36 @@ export const Route = createFileRoute("/esports/")({
       },
     ],
   }),
+  loader: async () => {
+    const [live, upcoming, finished, teams, players] = await Promise.all([
+      listMatchesFn({ data: { status: "live", limit: 50 } }),
+      listMatchesFn({ data: { status: "upcoming", limit: 50 } }),
+      listMatchesFn({ data: { status: "finished", limit: 50 } }),
+      listTeamsFn({ data: {} }),
+      listPlayersFn({ data: {} }),
+    ]);
+    
+    return { live, upcoming, finished, teams, players };
+  },
   component: EsportsPage,
 });
 
 function EsportsPage() {
   const mounted = useMounted();
   const [filter, setFilter] = useState<EsportsGame | "all">("all");
+  const loaderData = Route.useLoaderData();
 
   const live = useMemo(
-    () => liveMatches().filter((m) => filter === "all" || m.game === filter),
-    [filter],
+    () => loaderData.live.filter((m) => filter === "all" || m.game === filter),
+    [filter, loaderData.live],
   );
   const upcoming = useMemo(
-    () => upcomingMatches().filter((m) => filter === "all" || m.game === filter),
-    [filter],
+    () => loaderData.upcoming.filter((m) => filter === "all" || m.game === filter),
+    [filter, loaderData.upcoming],
   );
   const finished = useMemo(
-    () => finishedMatches().filter((m) => filter === "all" || m.game === filter),
-    [filter],
+    () => loaderData.finished.filter((m) => filter === "all" || m.game === filter),
+    [filter, loaderData.finished],
   );
 
   const standingsGames: EsportsGame[] = filter === "all" ? esportsGames : [filter];
@@ -247,7 +259,8 @@ function EmptyRow({ children }: { children: React.ReactNode }) {
 }
 
 function StandingsTable({ game }: { game: EsportsGame }) {
-  const teams = teamsByGame(game);
+  const loaderData = Route.useLoaderData();
+  const teams = loaderData.teams.filter((t) => t.game === game);
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/40 backdrop-blur">
       <table className="w-full text-sm">
@@ -314,7 +327,8 @@ function StandingsTable({ game }: { game: EsportsGame }) {
 }
 
 function PlayersBoard({ game }: { game: EsportsGame }) {
-  const players = playersByGame(game);
+  const loaderData = Route.useLoaderData();
+  const players = loaderData.players.filter((p) => p.game === game);
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/40 backdrop-blur">
       <div className="border-b border-border/60 bg-surface/60 px-4 py-2.5 text-[10px] font-mono-accent uppercase tracking-wider text-muted-foreground">

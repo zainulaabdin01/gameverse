@@ -1,39 +1,74 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { liveMatches, upcomingMatches, getTeam, type Match } from "@/data/esports";
+import { getTickerDataFn, listMatchesFn } from "@/queries/esports";
 import { formatViewers, timeUntil } from "@/lib/format";
 import { useMounted } from "@/hooks/use-mounted";
+import type { Match } from "@/data/esports";
 
-/** Subtle live nudge: tweak scores/viewers periodically to feel alive. */
-function useLiveNudge(initial: Match[]) {
-  const [items, setItems] = useState(initial);
+/** Fetch real ticker data from database */
+function useTickerData() {
+  const [data, setData] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
-    const id = setInterval(() => {
-      setItems((prev) =>
-        prev.map((m) => {
-          if (m.status !== "live") return m;
-          const bumpA = Math.random() < 0.15 ? 1 : 0;
-          const bumpB = !bumpA && Math.random() < 0.15 ? 1 : 0;
-          const viewerDelta = Math.floor((Math.random() - 0.45) * 1500);
-          return {
-            ...m,
-            scoreA: m.scoreA + bumpA,
-            scoreB: m.scoreB + bumpB,
-            viewers: Math.max(1000, (m.viewers ?? 0) + viewerDelta),
-          };
-        }),
-      );
-    }, 4000);
-    return () => clearInterval(id);
+    let mounted = true;
+    
+    const fetchData = async () => {
+      try {
+        const tickerData = await getTickerDataFn();
+        if (mounted) {
+          setData(tickerData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch ticker data:', error);
+        // Fallback to empty array if database is unavailable
+        if (mounted) {
+          setData([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchData();
+    
+    // Refresh every 30 seconds to get latest live data
+    const interval = setInterval(fetchData, 30000);
+    
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
-  return items;
+  
+  return { data, loading };
 }
 
 export function LiveTicker() {
-  const live = useLiveNudge(liveMatches());
-  const upcoming = upcomingMatches().slice(0, 4);
+  const { data: live, loading } = useTickerData();
+  
+  // Get upcoming matches for ticker
+  const [upcoming, setUpcoming] = useState<Match[]>([]);
+  
+  useEffect(() => {
+    const fetchUpcoming = async () => {
+      try {
+        const upcomingData = await listMatchesFn({ data: { status: "upcoming", limit: 4 } });
+        setUpcoming(upcomingData);
+      } catch (error) {
+        console.error('Failed to fetch upcoming matches:', error);
+        setUpcoming([]);
+      }
+    };
+    
+    fetchUpcoming();
+    const interval = setInterval(fetchUpcoming, 60000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, []);
 
-  // Duplicate items for seamless loop
+  // Combine live and upcoming matches
   const items = [...live, ...upcoming];
   const stream = [...items, ...items];
 
@@ -63,8 +98,7 @@ export function LiveTicker() {
 }
 
 function TickerItem({ match }: { match: Match }) {
-  const a = getTeam(match.teamAId);
-  const b = getTeam(match.teamBId);
+  // For ticker, we'll show team IDs as fallback since we don't have full team data
   const mounted = useMounted();
   return (
     <Link
@@ -86,15 +120,15 @@ function TickerItem({ match }: { match: Match }) {
       )}
       <span className="flex items-center gap-2 font-medium group-hover:text-primary transition-colors">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full" style={{ background: a.logoColor }} />
-          {a.tag}
+          <span className="h-2 w-2 rounded-full bg-muted" />
+          {match.teamAId}
         </span>
         <span className="font-mono-accent text-foreground">
           {match.scoreA} <span className="text-muted-foreground">:</span> {match.scoreB}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full" style={{ background: b.logoColor }} />
-          {b.tag}
+          {match.teamBId}
+          <span className="h-2 w-2 rounded-full bg-muted" />
         </span>
       </span>
       {match.viewers && (

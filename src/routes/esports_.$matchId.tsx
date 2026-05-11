@@ -1,21 +1,44 @@
 import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { getMatch, getTeam, playersByGame, matchesByGame } from "@/data/esports";
+import { 
+  getMatchByIdFn, 
+  getTeamByIdFn, 
+  getPlayersByTeamFn,
+  listMatchesFn 
+} from "@/queries/esports";
 import { MatchCard } from "@/components/MatchCard";
 import { formatViewers, timeUntil } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Match, Team, Player } from "@/data/esports";
 
 export const Route = createFileRoute("/esports_/$matchId")({
-  loader: ({ params }) => {
-    const match = getMatch(params.matchId);
+  loader: async ({ params }) => {
+    const match = await getMatchByIdFn({ data: params.matchId });
     if (!match) throw notFound();
-    return { match };
+    
+    // Fetch related teams and players for detailed view
+    const [teamA, teamB, teamAPlayers, teamBPlayers, relatedMatches] = await Promise.all([
+      getTeamByIdFn({ data: match.teamAId }),
+      getTeamByIdFn({ data: match.teamBId }),
+      getPlayersByTeamFn({ data: match.teamAId }),
+      getPlayersByTeamFn({ data: match.teamBId }),
+      listMatchesFn({ data: { game: match.game, limit: 10 } }),
+    ]);
+    
+    return { 
+      match, 
+      teamA, 
+      teamB, 
+      teamAPlayers: teamAPlayers || [], 
+      teamBPlayers: teamBPlayers || [],
+      relatedMatches: relatedMatches?.filter(m => m.id !== match.id) || []
+    };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [] };
-    const a = getTeam(loaderData.match.teamAId);
-    const b = getTeam(loaderData.match.teamBId);
-    const title = `${a.name} vs ${b.name} — ${loaderData.match.tournament}`;
+    const a = loaderData.teamA;
+    const b = loaderData.teamB;
+    const title = `${a?.name || 'Team'} vs ${b?.name || 'Team'} — ${loaderData.match.tournament}`;
     return {
       meta: [
         { title: `${title} — Gameverse` },
@@ -57,13 +80,13 @@ export const Route = createFileRoute("/esports_/$matchId")({
 });
 
 function MatchPage() {
-  const { match } = Route.useLoaderData();
-  const a = getTeam(match.teamAId);
-  const b = getTeam(match.teamBId);
-  const playersA = playersByGame(match.game).filter((p) => p.teamId === a.id);
-  const playersB = playersByGame(match.game).filter((p) => p.teamId === b.id);
-  const otherFromTournament = matchesByGame(match.game)
-    .filter((m) => m.id !== match.id && m.tournament === match.tournament)
+  const { match, teamA, teamB, teamAPlayers, teamBPlayers, relatedMatches } = Route.useLoaderData();
+  const a = teamA || { id: match.teamAId, name: 'Team A', tag: 'TMA', region: 'Unknown', game: match.game, logoColor: '#666', wins: 0, losses: 0, points: 0, formStreak: [] };
+  const b = teamB || { id: match.teamBId, name: 'Team B', tag: 'TMB', region: 'Unknown', game: match.game, logoColor: '#666', wins: 0, losses: 0, points: 0, formStreak: [] };
+  const playersA = teamAPlayers || [];
+  const playersB = teamBPlayers || [];
+  const otherFromTournament = relatedMatches
+    .filter((m) => m.tournament === match.tournament)
     .slice(0, 3);
 
   return (
@@ -141,7 +164,7 @@ function BigTeam({
   team,
   align = "left",
 }: {
-  team: ReturnType<typeof getTeam>;
+  team: Team;
   align?: "left" | "right";
 }) {
   return (
@@ -173,8 +196,8 @@ function RosterTable({
   team,
   players,
 }: {
-  team: ReturnType<typeof getTeam>;
-  players: ReturnType<typeof playersByGame>;
+  team: Team;
+  players: Player[];
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border/60 bg-surface">
