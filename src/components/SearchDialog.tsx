@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Command as CommandPrimitive } from "cmdk";
@@ -20,11 +20,11 @@ import {
   ArrowUp,
   ArrowDown,
   Sparkles,
+  Loader2,
 } from "lucide-react";
-import { games } from "@/data/games";
-import { articles } from "@/data/news";
-import { matches, getTeam } from "@/data/esports";
+import { globalSearchFn } from "@/queries/search";
 import { cn } from "@/lib/utils";
+import type { SearchResult } from "@/queries/search";
 
 interface SearchDialogProps {
   open: boolean;
@@ -34,59 +34,61 @@ interface SearchDialogProps {
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!open) setQuery("");
+    if (!open) {
+      setQuery("");
+      setSearchResults([]);
+    }
   }, [open]);
 
-  const q = query.trim().toLowerCase();
+  // Debounced search function
+  const performSearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
-  const gameResults = useMemo(
-    () =>
-      games
-        .filter((g) =>
-          !q
-            ? true
-            : g.title.toLowerCase().includes(q) ||
-              g.developer.toLowerCase().includes(q) ||
-              g.genres.some((x) => x.toLowerCase().includes(q)),
-        )
-        .slice(0, 6),
-    [q],
-  );
+    setIsLoading(true);
+    try {
+      const results = await globalSearchFn({ 
+        data: { 
+          q: searchQuery.trim(), 
+          limit: 20 
+        }
+      });
+      setSearchResults(results.results);
+    } catch (error) {
+      console.error("Search failed:", error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const newsResults = useMemo(
-    () =>
-      articles
-        .filter((a) =>
-          !q
-            ? true
-            : a.title.toLowerCase().includes(q) ||
-              a.excerpt.toLowerCase().includes(q) ||
-              a.category.toLowerCase().includes(q) ||
-              a.source.toLowerCase().includes(q),
-        )
-        .slice(0, 6),
-    [q],
-  );
+  // Debounced search effect
+  useEffect(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
-  const matchResults = useMemo(
-    () =>
-      matches
-        .filter((m) => {
-          const a = getTeam(m.teamAId);
-          const b = getTeam(m.teamBId);
-          if (!q) return true;
-          return (
-            m.tournament.toLowerCase().includes(q) ||
-            m.game.toLowerCase().includes(q) ||
-            a.name.toLowerCase().includes(q) ||
-            b.name.toLowerCase().includes(q)
-          );
-        })
-        .slice(0, 5),
-    [q],
-  );
+    const timeout = setTimeout(() => {
+      performSearch(query);
+    }, 300); // 300ms debounce
+
+    setSearchTimeout(timeout);
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [query, performSearch]);
+
+  // Group results by type
+  const gameResults = useMemo(() => searchResults.filter(r => r.type === "game").slice(0, 6), [searchResults]);
+  const newsResults = useMemo(() => searchResults.filter(r => r.type === "article").slice(0, 6), [searchResults]);
+  const matchResults = useMemo(() => searchResults.filter(r => r.type === "match").slice(0, 5), [searchResults]);
 
   const go = (path: string) => {
     onOpenChange(false);
@@ -156,13 +158,19 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
             <CommandList className="max-h-[420px] px-2 py-2">
               <CommandEmpty className="flex flex-col items-center gap-2 py-10 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-surface/40">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium">No results found</p>
-                <p className="text-xs text-muted-foreground">
-                  Try another keyword or browse the verse below.
-                </p>
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-surface/40">
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium">No results found</p>
+                    <p className="text-xs text-muted-foreground">
+                      Try another keyword or browse the verse below.
+                    </p>
+                  </>
+                )}
               </CommandEmpty>
 
               <CommandGroup
@@ -197,29 +205,32 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                     heading="Games"
                     className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:font-mono-accent [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.25em] [&_[cmdk-group-heading]]:text-muted-foreground"
                   >
-                    {gameResults.map((g) => (
+                    {gameResults.map((result) => {
+                      const game = result.data as any;
+                      return (
                       <CommandItem
-                        key={g.slug}
-                        value={`game ${g.title} ${g.developer}`}
-                        onSelect={() => go(`/games/${g.slug}`)}
+                        key={result.id}
+                        value={`game ${game.title} ${game.developer}`}
+                        onSelect={() => go(`/games/${result.id}`)}
                         className="group my-0.5 cursor-pointer rounded-md data-[selected=true]:bg-gradient-to-r data-[selected=true]:from-primary/15 data-[selected=true]:to-accent/10"
                       >
                         <img
-                          src={g.cover}
+                          src={game.cover}
                           alt=""
                           className="h-8 w-8 flex-shrink-0 rounded-md object-cover ring-1 ring-border/60"
                         />
                         <div className="flex min-w-0 flex-1 flex-col">
-                          <span className="truncate text-sm font-medium">{g.title}</span>
+                          <span className="truncate text-sm font-medium">{game.title}</span>
                           <span className="truncate text-[11px] text-muted-foreground">
-                            {g.developer} · {g.genres[0]}
+                            {game.developer} · {game.genres?.[0]}
                           </span>
                         </div>
                         <span className="font-mono-accent text-[10px] text-primary">
-                          ★ {g.rating}
+                          ★ {game.rating}
                         </span>
                       </CommandItem>
-                    ))}
+                    );
+                    })}
                   </CommandGroup>
                 </>
               )}
@@ -231,22 +242,25 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                     heading="News"
                     className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:font-mono-accent [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.25em] [&_[cmdk-group-heading]]:text-muted-foreground"
                   >
-                    {newsResults.map((a) => (
+                    {newsResults.map((result) => {
+                      const article = result.data as any;
+                      return (
                       <CommandItem
-                        key={a.slug}
-                        value={`news ${a.title} ${a.category}`}
-                        onSelect={() => go(`/news/${a.slug}`)}
+                        key={result.id}
+                        value={`news ${article.title} ${article.category}`}
+                        onSelect={() => go(`/news/${result.id}`)}
                         className="group my-0.5 cursor-pointer rounded-md data-[selected=true]:bg-gradient-to-r data-[selected=true]:from-primary/15 data-[selected=true]:to-accent/10"
                       >
                         <div className="flex h-7 w-7 items-center justify-center rounded-md border border-border/60 bg-surface/60 text-muted-foreground group-data-[selected=true]:border-accent/50 group-data-[selected=true]:text-accent">
                           <Newspaper className="h-3.5 w-3.5" />
                         </div>
-                        <span className="flex-1 truncate text-sm">{a.title}</span>
+                        <span className="flex-1 truncate text-sm">{article.title}</span>
                         <span className="font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {a.source}
+                          {article.source}
                         </span>
                       </CommandItem>
-                    ))}
+                    );
+                    })}
                   </CommandGroup>
                 </>
               )}
@@ -258,63 +272,59 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                     heading="Matches"
                     className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:font-mono-accent [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.25em] [&_[cmdk-group-heading]]:text-muted-foreground"
                   >
-                    {matchResults.map((m) => {
-                      const a = getTeam(m.teamAId);
-                      const b = getTeam(m.teamBId);
+                    {matchResults.map((result) => {
+                      const match = result.data as any;
                       return (
-                        <CommandItem
-                          key={m.id}
-                          value={`match ${a.name} ${b.name} ${m.tournament}`}
-                          onSelect={() => go(`/esports/${m.id}`)}
-                          className="group my-0.5 cursor-pointer rounded-md data-[selected=true]:bg-gradient-to-r data-[selected=true]:from-primary/15 data-[selected=true]:to-accent/10"
-                        >
-                          <div className="flex h-7 w-7 items-center justify-center rounded-md border border-border/60 bg-surface/60 text-muted-foreground group-data-[selected=true]:border-primary/50 group-data-[selected=true]:text-primary">
-                            <Trophy className="h-3.5 w-3.5" />
+                      <CommandItem
+                        key={result.id}
+                        value={`match ${match.tournament} ${match.game}`}
+                        onSelect={() => go(`/esports/${result.id}`)}
+                        className="group my-0.5 cursor-pointer rounded-md data-[selected=true]:bg-gradient-to-r data-[selected=true]:from-primary/15 data-[selected=true]:to-accent/10"
+                      >
+                        <div className="flex h-7 w-7 items-center justify-center rounded-md border border-border/60 bg-surface/60 text-muted-foreground group-data-[selected=true]:border-accent/50 group-data-[selected=true]:text-accent">
+                          <Trophy className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate text-sm font-medium">
+                            {match.team_a_tag || 'Team A'} vs {match.team_b_tag || 'Team B'}
                           </div>
-                          <span className="flex-1 truncate text-sm">
-                            <span className="font-semibold">{a.name}</span>
-                            <span className="mx-1.5 text-muted-foreground">vs</span>
-                            <span className="font-semibold">{b.name}</span>
-                          </span>
-                          <span className="font-mono-accent text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {m.game}
-                          </span>
-                        </CommandItem>
-                      );
+                          <div className="truncate text-[11px] text-muted-foreground">
+                            {match.tournament} · {match.game}
+                          </div>
+                        </div>
+                        <span className="font-mono-accent text-[10px] uppercase text-muted-foreground">
+                          {match.status === "live" ? "LIVE" : match.status}
+                        </span>
+                      </CommandItem>
+                    );
                     })}
                   </CommandGroup>
                 </>
-              )}
-            </CommandList>
+            )}
+          </CommandList>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between border-t border-border/60 bg-surface/40 px-4 py-2 text-[11px] text-muted-foreground">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <kbd className="flex h-5 w-5 items-center justify-center rounded border border-border/60 bg-surface-3 font-mono-accent">
-                    <ArrowUp className="h-2.5 w-2.5" />
-                  </kbd>
-                  <kbd className="flex h-5 w-5 items-center justify-center rounded border border-border/60 bg-surface-3 font-mono-accent">
-                    <ArrowDown className="h-2.5 w-2.5" />
-                  </kbd>
-                  Navigate
-                </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="flex h-5 items-center justify-center gap-0.5 rounded border border-border/60 bg-surface-3 px-1 font-mono-accent">
-                    <CornerDownLeft className="h-2.5 w-2.5" />
-                  </kbd>
-                  Open
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="font-mono-accent uppercase tracking-widest">Gameverse</span>
-                <span className="opacity-50">·</span>
-                <kbd className="flex items-center gap-0.5 rounded border border-border/60 bg-surface-3 px-1 py-0.5 font-mono-accent">
-                  <Command className="h-2.5 w-2.5" />K
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-border/60 bg-surface/40 px-4 py-2 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <kbd className="flex h-5 w-5 items-center justify-center rounded border border-border/60 bg-surface-3 font-mono-accent">
+                  <ArrowUp className="h-2.5 w-2.5" />
                 </kbd>
-              </div>
+                <kbd className="flex h-5 w-5 items-center justify-center gap-0.5 rounded border border-border/60 bg-surface-3 px-1 font-mono-accent">
+                  <CornerDownLeft className="h-2.5 w-2.5" />
+                </kbd>
+                Open
+              </span>
             </div>
-          </CommandPrimitive>
+            <div className="flex items-center gap-1">
+              <span className="font-mono-accent uppercase tracking-widest">Gameverse</span>
+              <span className="opacity-50">·</span>
+              <kbd className="flex items-center gap-0.5 rounded border border-border/60 bg-surface-3 px-1 py-0.5 font-mono-accent">
+                <Command className="h-2.5 w-2.5" />K
+              </kbd>
+            </div>
+          </div>
+        </CommandPrimitive>
         </div>
       </DialogContent>
     </Dialog>

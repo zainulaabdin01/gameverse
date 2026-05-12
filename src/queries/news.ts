@@ -1,18 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getDB } from "../server/db";
 import { type ArticleRow, articleRowToArticle } from "../server/types";
+import { getCachedData, CACHE_KEYS, CACHE_TTL } from "../server/cache";
 
 /**
  * Fetch the 100 most recent articles to populate the News Hub.
  */
 export const listArticlesFn = createServerFn({ method: "GET" }).handler(async () => {
-  const db = await getDB();
-  const result = await db
-    .prepare("SELECT * FROM articles ORDER BY published_at DESC LIMIT 100")
-    .all<ArticleRow>();
+  return await getCachedData(
+    CACHE_KEYS.NEWS_LIST(),
+    async () => {
+      const db = await getDB();
+      const result = await db
+        .prepare("SELECT * FROM articles ORDER BY published_at DESC LIMIT 100")
+        .all<ArticleRow>();
 
-  if (!result.results) return [];
-  return result.results.map(articleRowToArticle);
+      if (!result.results) return [];
+      return result.results.map(articleRowToArticle);
+    },
+    CACHE_TTL.NEWS
+  );
 });
 
 /**
@@ -21,42 +28,54 @@ export const listArticlesFn = createServerFn({ method: "GET" }).handler(async ()
 export const getArticleBySlugFn = createServerFn({ method: "GET" })
   .inputValidator((data: string) => data)
   .handler(async ({ data }) => {
-    const db = await getDB();
-    const result = await db
-      .prepare("SELECT * FROM articles WHERE slug = ?")
-      .bind(data)
-      .first<ArticleRow>();
+    return await getCachedData(
+      CACHE_KEYS.ARTICLE(data),
+      async () => {
+        const db = await getDB();
+        const result = await db
+          .prepare("SELECT * FROM articles WHERE slug = ?")
+          .bind(data)
+          .first<ArticleRow>();
 
-    if (!result) return null;
-    return articleRowToArticle(result);
+        if (!result) return null;
+        return articleRowToArticle(result);
+      },
+      CACHE_TTL.NEWS
+    );
   });
 
 /**
  * Fetch the top stories, featured articles, and trending articles for the homepage.
  */
 export const getNewsHomepageFn = createServerFn({ method: "GET" }).handler(async () => {
-  const db = await getDB();
+  return await getCachedData(
+    CACHE_KEYS.HOMEPAGE_DATA,
+    async () => {
+      const db = await getDB();
 
-  // Trending: highest reads
-  const trendingRes = await db
-    .prepare("SELECT * FROM articles ORDER BY reads DESC LIMIT 5")
-    .all<ArticleRow>();
+      // Trending: highest reads
+      const trendingRes = await db
+        .prepare("SELECT * FROM articles ORDER BY reads DESC LIMIT 5")
+        .all<ArticleRow>();
 
-  // Featured: specifically marked as featured
-  const featuredRes = await db
-    .prepare("SELECT * FROM articles WHERE featured = 1 ORDER BY published_at DESC LIMIT 2")
-    .all<ArticleRow>();
+      // Featured: specifically marked as featured
+      const featuredRes = await db
+        .prepare("SELECT * FROM articles WHERE featured = 1 ORDER BY published_at DESC LIMIT 2")
+        .all<ArticleRow>();
 
-  // Top Stories: recent non-featured
-  const topStoriesRes = await db
-    .prepare("SELECT * FROM articles WHERE featured = 0 ORDER BY published_at DESC LIMIT 6")
-    .all<ArticleRow>();
+      // Top Stories: recent non-featured
+      const topStoriesRes = await db
+        .prepare("SELECT * FROM articles WHERE featured = 0 ORDER BY published_at DESC LIMIT 6")
+        .all<ArticleRow>();
 
-  return {
-    trending: trendingRes.results?.map(articleRowToArticle) || [],
-    featured: featuredRes.results?.map(articleRowToArticle) || [],
-    topStories: topStoriesRes.results?.map(articleRowToArticle) || [],
-  };
+      return {
+        trending: trendingRes.results?.map(articleRowToArticle) || [],
+        featured: featuredRes.results?.map(articleRowToArticle) || [],
+        topStories: topStoriesRes.results?.map(articleRowToArticle) || [],
+      };
+    },
+    CACHE_TTL.NEWS
+  );
 });
 
 /**
@@ -65,16 +84,22 @@ export const getNewsHomepageFn = createServerFn({ method: "GET" }).handler(async
 export const getRelatedArticlesFn = createServerFn({ method: "GET" })
   .inputValidator((data: { category: string; excludeSlug: string }) => data)
   .handler(async ({ data }) => {
-    const db = await getDB();
-    const result = await db
-      .prepare(
-        "SELECT * FROM articles WHERE category = ? AND slug != ? ORDER BY published_at DESC LIMIT 5"
-      )
-      .bind(data.category, data.excludeSlug)
-      .all<ArticleRow>();
+    return await getCachedData(
+      `news:related:${data.category}:${data.excludeSlug}`,
+      async () => {
+        const db = await getDB();
+        const result = await db
+          .prepare(
+            "SELECT * FROM articles WHERE category = ? AND slug != ? ORDER BY published_at DESC LIMIT 5"
+          )
+          .bind(data.category, data.excludeSlug)
+          .all<ArticleRow>();
 
-    if (!result.results) return [];
-    return result.results.map(articleRowToArticle);
+        if (!result.results) return [];
+        return result.results.map(articleRowToArticle);
+      },
+      CACHE_TTL.NEWS
+    );
   });
 
 /**
@@ -83,14 +108,20 @@ export const getRelatedArticlesFn = createServerFn({ method: "GET" })
 export const getArticlesByGameFn = createServerFn({ method: "GET" })
   .inputValidator((data: string) => data)
   .handler(async ({ data }) => {
-    const db = await getDB();
-    const result = await db
-      .prepare(
-        "SELECT * FROM articles WHERE related_game_slug = ? ORDER BY published_at DESC LIMIT 5"
-      )
-      .bind(data)
-      .all<ArticleRow>();
+    return await getCachedData(
+      `news:game:${data}`,
+      async () => {
+        const db = await getDB();
+        const result = await db
+          .prepare(
+            "SELECT * FROM articles WHERE related_game_slug = ? ORDER BY published_at DESC LIMIT 5"
+          )
+          .bind(data)
+          .all<ArticleRow>();
 
-    if (!result.results) return [];
-    return result.results.map(articleRowToArticle);
+        if (!result.results) return [];
+        return result.results.map(articleRowToArticle);
+      },
+      CACHE_TTL.NEWS
+    );
   });
