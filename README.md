@@ -30,6 +30,12 @@ No tab circus. One URL.
 
 ---
 
+## Origin and authorship
+
+This project **started from my first-semester project** and grew into what you see here. The **frontend was vibe coded** (fast, exploratory UI work). The **backend is my own creation** — the data model, Cloudflare bindings, scrapers, caching, and server-side behavior I designed and built myself.
+
+---
+
 ## Highlights
 
 | Area | What you get |
